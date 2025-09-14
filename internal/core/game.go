@@ -1,17 +1,15 @@
 // Package game provides the core game logic and initialization.
 // It handles the main game loop, window management, and scene coordination.
-package game
+package core
 
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
-
-	"simple-go-game/internal/core/scene"
 )
 
 // Game represents the main game instance.
 // It manages the game window, scene, and main game loop.
 type Game struct {
-	scene  *scene.Scene
+	scene  *Scene
 	width  int32
 	height int32
 	title  string
@@ -30,12 +28,12 @@ func NewGame(width, height int32, title string, fps int32) *Game {
 }
 
 // Scene returns the current scene.
-func (g *Game) Scene() *scene.Scene {
+func (g *Game) Scene() *Scene {
 	return g.scene
 }
 
 // SetScene assigns a scene to the game instance.
-func (g *Game) SetScene(s *scene.Scene) {
+func (g *Game) SetScene(s *Scene) {
 	g.scene = s
 }
 

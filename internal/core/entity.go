@@ -1,6 +1,6 @@
 // Package entity provides the core entity system for the game.
 // It defines the Entity and Drawable interfaces along with their base implementations.
-package entity
+package core
 
 import "sync/atomic"
 

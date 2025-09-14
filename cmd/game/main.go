@@ -3,13 +3,14 @@
 package main
 
 import (
-	"simple-go-game/internal/core/game"
+	_ "embed"
+	"simple-go-game/internal/core"
 	"simple-go-game/internal/scenes"
 )
 
 func main() {
 	// Create a new game instance
-	g := game.NewGame(800, 600, "Simple Go Game", 60)
+	g := core.NewGame(800, 600, "Simple Go Game", 60)
 
 	// Ensure cleanup when the program exits
 	defer g.Cleanup()

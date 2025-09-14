@@ -4,7 +4,9 @@ package player
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 
-	"simple-go-game/internal/core/entity"
+	"simple-go-game/internal/assets"
+	"simple-go-game/internal/components"
+	"simple-go-game/internal/core"
 )
 
 const (
@@ -15,68 +17,62 @@ const (
 // Player represents the main player character in the game.
 // It embeds BaseEntity and BaseDrawable to inherit core functionality.
 type Player struct {
-	*entity.BaseEntity
-	*entity.BaseDrawable
+	*core.BaseEntity
+	*core.BaseDrawable
 
 	// Player-specific properties
-	position rl.Vector2
-	speed    float32
-	color    rl.Color
+	transform      core.Transform
+	speed          float32
+	animatedSprite components.AnimatedSprite
 }
 
 // NewPlayer creates a new player entity at the specified position.
-func NewPlayer(x, y float32) *Player {
-	return &Player{
-		BaseEntity:   entity.NewBaseEntity(),
-		BaseDrawable: entity.NewBaseDrawable(1), // Z-index 1 for player layer
-		position:     rl.Vector2{X: x, Y: y},
-		speed:        100.0, // pixels per second
-		color:        rl.Blue,
+func NewPlayer(x, y float32, color string) *Player {
+	animatedSprite := components.NewAnimatedSprite()
+	for _, birdColor := range []string{"blue", "red", "yellow"} {
+		frames := assets.BirdSprites[birdColor]
+		animatedSprite.AddAnimation(birdColor, frames, 0.2, true)
 	}
-}
-
-// Position returns the current position of the player.
-func (p *Player) Position() rl.Vector2 {
-	return p.position
-}
-
-// SetPosition sets the player's position.
-func (p *Player) SetPosition(x, y float32) {
-	p.position = rl.Vector2{X: x, Y: y}
+	animatedSprite.SetAnimation(color)
+	return &Player{
+		BaseEntity:     core.NewBaseEntity(),
+		BaseDrawable:   core.NewBaseDrawable(1), // Z-index 1 for player layer
+		transform:      core.Transform{Position: rl.Vector2{X: x, Y: y}, Scale: rl.Vector2{X: 1, Y: 1}, Rotation: 0},
+		speed:          100.0, // pixels per second
+		animatedSprite: *animatedSprite,
+	}
 }
 
 // Update handles player input and movement.
 func (p *Player) Update(dt float64) {
 	// Call base implementation first
 	p.BaseEntity.Update(dt)
+	// Update animated sprite
+	p.animatedSprite.Update(dt)
 
 	// Handle player movement input
 	if rl.IsKeyDown(rl.KeyRight) || rl.IsKeyDown(rl.KeyD) {
-		p.position.X += p.speed * float32(dt)
+		p.transform.Position.X += p.speed * float32(dt)
 	}
 	if rl.IsKeyDown(rl.KeyLeft) || rl.IsKeyDown(rl.KeyA) {
-		p.position.X -= p.speed * float32(dt)
+		p.transform.Position.X -= p.speed * float32(dt)
 	}
 	if rl.IsKeyDown(rl.KeyUp) || rl.IsKeyDown(rl.KeyW) {
-		p.position.Y -= p.speed * float32(dt)
+		p.transform.Position.Y -= p.speed * float32(dt)
 	}
 	if rl.IsKeyDown(rl.KeyDown) || rl.IsKeyDown(rl.KeyS) {
-		p.position.Y += p.speed * float32(dt)
+		p.transform.Position.Y += p.speed * float32(dt)
 	}
 
 	// Keep player within screen bounds using raylib's Clamp function
 	screenWidth := float32(rl.GetScreenWidth())
 	screenHeight := float32(rl.GetScreenHeight())
 
-	p.position.X = rl.Clamp(p.position.X, 0, screenWidth-PlayerSize)
-	p.position.Y = rl.Clamp(p.position.Y, 0, screenHeight-PlayerSize)
+	p.transform.Position.X = rl.Clamp(p.transform.Position.X, 0, screenWidth-PlayerSize)
+	p.transform.Position.Y = rl.Clamp(p.transform.Position.Y, 0, screenHeight-PlayerSize)
 }
 
 // Draw renders the player to the screen.
 func (p *Player) Draw() {
-	// Draw player as a simple rectangle for now
-	rl.DrawRectangle(int32(p.position.X), int32(p.position.Y), PlayerSize, PlayerSize, p.color)
-
-	// Draw a simple border
-	rl.DrawRectangleLines(int32(p.position.X), int32(p.position.Y), PlayerSize, PlayerSize, rl.DarkBlue)
+	p.animatedSprite.Draw(p.transform)
 }

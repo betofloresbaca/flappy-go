@@ -1,31 +1,29 @@
 // Package scene provides scene management functionality for the game.
 // A scene manages a collection of entities and handles their lifecycle.
-package scene
+package core
 
 import (
 	"sort"
-
-	"simple-go-game/internal/core/entity"
 )
 
 // Scene manages a collection of entities and handles their updates and rendering.
 // It provides efficient entity lookup and maintains the entity lifecycle.
 type Scene struct {
-	entities      []entity.Entity
+	entities      []Entity
 	entityIndices map[uint64]int
 }
 
 // NewScene creates a new empty scene.
 func NewScene() *Scene {
 	return &Scene{
-		entities:      make([]entity.Entity, 0),
+		entities:      make([]Entity, 0),
 		entityIndices: make(map[uint64]int),
 	}
 }
 
 // Add adds an entity to the scene. If the entity is already in the scene, this is a no-op.
 // The entity's OnAdd method will be called after it's successfully added.
-func (s *Scene) Add(e entity.Entity) {
+func (s *Scene) Add(e Entity) {
 	if _, exists := s.entityIndices[e.Id()]; exists {
 		return
 	}
@@ -38,7 +36,7 @@ func (s *Scene) Add(e entity.Entity) {
 // Remove removes an entity from the scene. If the entity is not in the scene, this is a no-op.
 // The entity's OnRemove method will be called after it's successfully removed.
 // Uses swap-and-pop for O(1) removal.
-func (s *Scene) Remove(e entity.Entity) {
+func (s *Scene) Remove(e Entity) {
 	idToRemove := e.Id()
 	idxToRemove, exists := s.entityIndices[idToRemove]
 	if !exists {
@@ -64,9 +62,9 @@ func (s *Scene) Update(dt float64) {
 // Draw renders all drawable entities in the scene, sorted by Z-index.
 // Entities with lower Z-index values are drawn first (behind entities with higher values).
 func (s *Scene) Draw() {
-	var drawables []entity.Drawable
+	var drawables []Drawable
 	for _, e := range s.entities {
-		if d, ok := e.(entity.Drawable); ok {
+		if d, ok := e.(Drawable); ok {
 			drawables = append(drawables, d)
 		}
 	}
@@ -82,7 +80,7 @@ func (s *Scene) Draw() {
 
 // EntityById returns the entity with the given ID, or nil if not found.
 // The second return value indicates whether the entity was found.
-func (s *Scene) EntityById(id uint64) (entity.Entity, bool) {
+func (s *Scene) EntityById(id uint64) (Entity, bool) {
 	idx, exists := s.entityIndices[id]
 	if !exists {
 		return nil, false
