@@ -42,11 +42,13 @@ func (g *Game) SetScene(s *Scene) {
 func (g *Game) Initialize() {
 	rl.InitWindow(g.width, g.height, g.title)
 	rl.SetTargetFPS(g.fps)
+	rl.InitAudioDevice()
 }
 
 // Cleanup properly closes the game window and cleans up resources.
 // This should be called when the game is shutting down.
 func (g *Game) Cleanup() {
+	rl.CloseAudioDevice()
 	rl.CloseWindow()
 }
 
