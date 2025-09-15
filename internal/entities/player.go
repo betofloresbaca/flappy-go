@@ -11,7 +11,7 @@ import (
 const (
 	Player_ZIndex         = 0
 	Player_Size           = 20
-	Player_StartPositionX = 100
+	Player_StartPositionX = 150
 	Player_StartPositionY = 100
 	Player_Gravity        = 900.0
 	Player_MaxVelocityY   = 500.0

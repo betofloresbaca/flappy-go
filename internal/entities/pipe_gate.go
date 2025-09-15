@@ -10,8 +10,8 @@ import (
 
 const (
 	PipeGate_GapYMin   = 100
-	PipeGate_GapYMax   = 300
-	PipeGate_GapHeight = 120
+	PipeGate_GapYMax   = 350
+	PipeGate_GapHeight = 100
 )
 
 type PipeGate struct {
