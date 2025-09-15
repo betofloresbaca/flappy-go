@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	Background_ZIndex      = -1000
-	Background_SpritePivot = components.PivotUpLeft
-	Background_ImageNumber = 3
+	Background_ZIndex       = -1000
+	Background_SpritePivot  = components.PivotUpLeft
+	Background_ImagesNumber = 3
 )
 
 type Background struct {
@@ -27,7 +27,7 @@ func NewBackground(style string) *Background {
 }
 
 func (b *Background) Draw() {
-	for i := range Background_ImageNumber {
+	for i := range Background_ImagesNumber {
 		b.sprite.Draw(
 			*core.NewTransform(
 				float32(i)*float32(b.sprite.Texture.Width),

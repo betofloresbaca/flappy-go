@@ -1,11 +1,11 @@
 package entities
 
 import (
-	rl "github.com/gen2brain/raylib-go/raylib"
-
 	"simple-go-game/internal/assets"
 	"simple-go-game/internal/components"
 	"simple-go-game/internal/core"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 const (
@@ -13,6 +13,10 @@ const (
 	Player_Size           = 20
 	Player_StartPositionX = 100
 	Player_StartPositionY = 100
+	Player_Gravity        = 900.0
+	Player_MaxVelocityY   = 500.0
+	Player_JumpForce      = 300.0
+	Player_MaxRotation    = 75.0
 )
 
 // Player represents the main player character in the game.
@@ -23,6 +27,7 @@ type Player struct {
 
 	// Player-specific properties
 	transform      core.Transform
+	velocity       rl.Vector2
 	speed          float32
 	animatedSprite components.AnimatedSprite
 }
@@ -46,28 +51,36 @@ func NewPlayer(color string) *Player {
 
 // Update handles player input and movement.
 func (p *Player) Update(dt float32) {
-	// Update animated sprite
 	p.animatedSprite.Update(dt)
+	p.applyGravity(dt)
+	p.applyInputforce()
+	p.setFacingAngle()
+	p.updatePosition(dt)
 
-	// Handle player movement input
-	if rl.IsKeyDown(rl.KeyRight) || rl.IsKeyDown(rl.KeyD) {
-		p.transform.Position.X += p.speed * dt
+}
+
+func (p *Player) applyGravity(dt float32) {
+	p.velocity.Y += Player_Gravity * dt
+	p.velocity.Y = rl.Clamp(p.velocity.Y, -Player_MaxVelocityY, Player_MaxVelocityY)
+}
+
+func (p *Player) applyInputforce() {
+	if rl.IsKeyPressed(rl.KeySpace) || rl.IsMouseButtonPressed(rl.MouseLeftButton) {
+		p.velocity.Y = -Player_JumpForce
 	}
-	if rl.IsKeyDown(rl.KeyLeft) || rl.IsKeyDown(rl.KeyA) {
-		p.transform.Position.X -= p.speed * dt
-	}
-	if rl.IsKeyDown(rl.KeyUp) || rl.IsKeyDown(rl.KeyW) {
-		p.transform.Position.Y -= p.speed * dt
-	}
-	if rl.IsKeyDown(rl.KeyDown) || rl.IsKeyDown(rl.KeyS) {
-		p.transform.Position.Y += p.speed * dt
-	}
+}
+
+func (p *Player) setFacingAngle() {
+	p.transform.Rotation = (p.velocity.Y / Player_MaxVelocityY) * Player_MaxRotation
+}
+
+func (p *Player) updatePosition(dt float32) {
+	// Update position based on velocity
+	p.transform.Position.X += p.velocity.X * dt
+	p.transform.Position.Y += p.velocity.Y * dt
 
 	// Keep player within screen bounds using raylib's Clamp function
-	screenWidth := float32(rl.GetScreenWidth())
 	screenHeight := float32(rl.GetScreenHeight())
-
-	p.transform.Position.X = rl.Clamp(p.transform.Position.X, 0, screenWidth-Player_Size)
 	p.transform.Position.Y = rl.Clamp(p.transform.Position.Y, 0, screenHeight-Player_Size)
 }
 

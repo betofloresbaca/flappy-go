@@ -5,7 +5,7 @@ import (
 	"simple-go-game/internal/entities"
 )
 
-func CreateMainBoard() *core.Scene {
+func GameBoard() *core.Scene {
 	var speed float32 = 100.0
 
 	scene := core.NewScene()

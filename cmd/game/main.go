@@ -19,7 +19,7 @@ func main() {
 	g.Initialize()
 
 	// Create and set the main scene
-	mainScene := scenes.CreateMainBoard()
+	mainScene := scenes.GameBoard()
 	g.SetScene(mainScene)
 
 	// Start the main game loop
