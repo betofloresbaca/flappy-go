@@ -4,11 +4,12 @@ import (
 	"simple-go-game/internal/assets"
 	"simple-go-game/internal/components"
 	"simple-go-game/internal/core"
-
-	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-const groundY = 440
+const (
+	Ground_ZIndex = -100
+	Ground_Y      = 440
+)
 
 type Ground struct {
 	*core.BaseEntity
@@ -22,7 +23,7 @@ type Ground struct {
 func NewGround(speed float32) *Ground {
 	return &Ground{
 		BaseEntity:   core.NewBaseEntity(),
-		BaseDrawable: core.NewBaseDrawable(-100),
+		BaseDrawable: core.NewBaseDrawable(Ground_ZIndex),
 		sprite:       *components.NewSprite(assets.GroundSprite, components.PivotUpLeft),
 		speed:        speed,
 	}
@@ -41,10 +42,8 @@ func (g *Ground) Update(dt float32) {
 
 func (g *Ground) Draw() {
 	for i := range 4 {
-		g.sprite.Draw(core.Transform{
-			Position: rl.Vector2{X: float32(i)*float32(g.sprite.Texture.Width) + g.offset, Y: groundY},
-			Scale:    rl.Vector2{X: 1, Y: 1},
-			Rotation: 0,
-		})
+		g.sprite.Draw(
+			*core.NewTransform(float32(i)*float32(g.sprite.Texture.Width)+g.offset, Ground_Y),
+		)
 	}
 }

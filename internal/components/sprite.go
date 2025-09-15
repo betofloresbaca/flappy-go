@@ -6,6 +6,10 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
+const (
+	Sprite_Format = ".png"
+)
+
 type Sprite struct {
 	Texture rl.Texture2D
 	Pivot   Pivot
@@ -15,14 +19,12 @@ type Sprite struct {
 
 // NewSprite creates a sprite from image data ([]byte, PNG) and a pivot
 func NewSprite(data []byte, pivot Pivot) *Sprite {
-	img := rl.LoadImageFromMemory(".png", data, int32(len(data)))
+	img := rl.LoadImageFromMemory(Sprite_Format, data, int32(len(data)))
 	texture := rl.LoadTextureFromImage(img)
 	rl.UnloadImage(img)
 	return &Sprite{
 		Texture: texture,
 		Pivot:   pivot,
-		FlipH:   false,
-		FlipV:   false,
 	}
 }
 

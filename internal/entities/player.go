@@ -9,9 +9,10 @@ import (
 )
 
 const (
-	PlayerSize     = 20
-	StartPositionX = 100
-	StartPositionY = 100
+	Player_ZIndex         = 0
+	Player_Size           = 20
+	Player_StartPositionX = 100
+	Player_StartPositionY = 100
 )
 
 // Player represents the main player character in the game.
@@ -35,13 +36,9 @@ func NewPlayer(color string) *Player {
 	}
 	animatedSprite.SetAnimation(color)
 	return &Player{
-		BaseEntity:   core.NewBaseEntity(),
-		BaseDrawable: core.NewBaseDrawable(0),
-		transform: core.Transform{
-			Position: rl.Vector2{X: StartPositionX, Y: StartPositionY},
-			Scale:    rl.Vector2{X: 1, Y: 1},
-			Rotation: 0,
-		},
+		BaseEntity:     core.NewBaseEntity(),
+		BaseDrawable:   core.NewBaseDrawable(Player_ZIndex),
+		transform:      *core.NewTransform(Player_StartPositionX, Player_StartPositionY),
 		speed:          100.0, // pixels per second
 		animatedSprite: *animatedSprite,
 	}
@@ -70,8 +67,8 @@ func (p *Player) Update(dt float32) {
 	screenWidth := float32(rl.GetScreenWidth())
 	screenHeight := float32(rl.GetScreenHeight())
 
-	p.transform.Position.X = rl.Clamp(p.transform.Position.X, 0, screenWidth-PlayerSize)
-	p.transform.Position.Y = rl.Clamp(p.transform.Position.Y, 0, screenHeight-PlayerSize)
+	p.transform.Position.X = rl.Clamp(p.transform.Position.X, 0, screenWidth-Player_Size)
+	p.transform.Position.Y = rl.Clamp(p.transform.Position.Y, 0, screenHeight-Player_Size)
 }
 
 // Draw renders the player to the screen.

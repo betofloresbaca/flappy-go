@@ -4,8 +4,12 @@ import (
 	"simple-go-game/internal/assets"
 	"simple-go-game/internal/components"
 	"simple-go-game/internal/core"
+)
 
-	rl "github.com/gen2brain/raylib-go/raylib"
+const (
+	Background_ZIndex      = -1000
+	Background_SpritePivot = components.PivotUpLeft
+	Background_ImageNumber = 3
 )
 
 type Background struct {
@@ -14,20 +18,21 @@ type Background struct {
 	sprite components.Sprite
 }
 
-func NewBackground() *Background {
+func NewBackground(style string) *Background {
 	return &Background{
 		BaseEntity:   core.NewBaseEntity(),
-		BaseDrawable: core.NewBaseDrawable(-1000), // Z-index -1 for background layer
-		sprite:       *components.NewSprite(assets.BackgroundSprites["day"], components.PivotUpLeft),
+		BaseDrawable: core.NewBaseDrawable(Background_ZIndex),
+		sprite:       *components.NewSprite(assets.BackgroundSprites[style], Background_SpritePivot),
 	}
 }
 
 func (b *Background) Draw() {
-	for i := range 3 {
-		b.sprite.Draw(core.Transform{
-			Position: rl.Vector2{X: float32(i) * float32(b.sprite.Texture.Width), Y: 0},
-			Scale:    rl.Vector2{X: 1, Y: 1},
-			Rotation: 0,
-		})
+	for i := range Background_ImageNumber {
+		b.sprite.Draw(
+			*core.NewTransform(
+				float32(i)*float32(b.sprite.Texture.Width),
+				0,
+			),
+		)
 	}
 }

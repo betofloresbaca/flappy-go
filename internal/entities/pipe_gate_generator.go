@@ -7,9 +7,10 @@ import (
 )
 
 const (
-	HSpacing  = 150
-	GapHeight = 100
-	XStart    = 400
+	PipeGateGenerator_ZIndex           = -300
+	PipeGateGenerator_HSpacing         = 150
+	PipeGateGenerator_XStart           = 400
+	PipeGateGenerator_PreloadZoneWidth = 100
 )
 
 type PipeGateGenerator struct {
@@ -23,15 +24,14 @@ type PipeGateGenerator struct {
 func NewPipeGateGenerator(speed float32) *PipeGateGenerator {
 	return &PipeGateGenerator{
 		BaseEntity:   core.NewBaseEntity(),
-		BaseDrawable: core.NewBaseDrawable(-300),
+		BaseDrawable: core.NewBaseDrawable(PipeGateGenerator_ZIndex),
 		speed:        speed,
 		pipeGates:    make([]PipeGate, 0),
 	}
 }
 
 func (pg *PipeGateGenerator) addPipe(x float32) {
-	y := float32(rl.GetRandomValue(50, int32(int(rl.GetScreenHeight())-int(GapHeight)-100)))
-	newPipe := NewPipeGate(x, y, GapHeight, pg.speed)
+	newPipe := NewPipeGate(x, pg.speed)
 	newPipe.Running = true
 	pg.pipeGates = append(pg.pipeGates, *newPipe)
 }
@@ -52,10 +52,10 @@ func (pg *PipeGateGenerator) Update(dt float32) {
 
 	// Generate new pipes if needed
 	if len(pg.pipeGates) == 0 {
-		pg.addPipe(XStart)
+		pg.addPipe(PipeGateGenerator_XStart)
 	}
 	nextXStart := pg.getNextXStart()
-	for nextXStart < float32(rl.GetScreenWidth()+100) {
+	for nextXStart < float32(rl.GetScreenWidth()+PipeGateGenerator_PreloadZoneWidth) {
 		pg.addPipe(nextXStart)
 		nextXStart = pg.getNextXStart()
 	}
@@ -65,7 +65,7 @@ func (pg *PipeGateGenerator) Update(dt float32) {
 func (pg *PipeGateGenerator) getNextXStart() float32 {
 	lastPipeX := pg.pipeGates[len(pg.pipeGates)-1].x
 	return lastPipeX +
-		HSpacing +
+		PipeGateGenerator_HSpacing +
 		float32(pg.pipeGates[len(pg.pipeGates)-1].topSprite.Texture.Width)
 }
 

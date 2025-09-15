@@ -10,10 +10,10 @@ func CreateMainBoard() *core.Scene {
 
 	scene := core.NewScene()
 	// Add the player to the scene
-	player := entities.NewPlayer("blue")
+	player := entities.NewPlayer("red")
 	scene.Add(player)
 	// Add the background to the scene
-	background := entities.NewBackground()
+	background := entities.NewBackground("night")
 	scene.Add(background)
 	// Add the ground to the scene
 	ground := entities.NewGround(speed)
