@@ -36,7 +36,7 @@ type Player struct {
 func NewPlayer(color string) *Player {
 	animatedSprite := components.NewAnimatedSprite()
 	for _, birdColor := range []string{"blue", "red", "yellow"} {
-		frames := assets.BirdSprites[birdColor]
+		frames := assets.BirdImages[birdColor]
 		animatedSprite.AddAnimation(birdColor, frames, 0.2, true)
 	}
 	animatedSprite.SetAnimation(color)

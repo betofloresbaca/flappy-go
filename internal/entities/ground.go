@@ -24,7 +24,7 @@ func NewGround(speed float32) *Ground {
 	return &Ground{
 		BaseEntity:   core.NewBaseEntity(),
 		BaseDrawable: core.NewBaseDrawable(Ground_ZIndex),
-		sprite:       *components.NewSprite(assets.GroundSprite, components.PivotUpLeft),
+		sprite:       *components.NewSprite(assets.GroundImage, components.PivotUpLeft),
 		speed:        speed,
 	}
 }

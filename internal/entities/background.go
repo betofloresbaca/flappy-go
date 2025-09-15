@@ -22,7 +22,7 @@ func NewBackground(style string) *Background {
 	return &Background{
 		BaseEntity:   core.NewBaseEntity(),
 		BaseDrawable: core.NewBaseDrawable(Background_ZIndex),
-		sprite:       *components.NewSprite(assets.BackgroundSprites[style], Background_SpritePivot),
+		sprite:       *components.NewSprite(assets.BackgroundImages[style], Background_SpritePivot),
 	}
 }
 
