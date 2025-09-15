@@ -37,7 +37,7 @@ func NewPipeGate(x, yOffset, gapHeight, speed float32) *PipeGate {
 	}
 }
 
-func (p *PipeGate) Update(dt float64) {
+func (p *PipeGate) Update(dt float32) {
 	if !p.Running {
 		return
 	}

@@ -53,7 +53,7 @@ func (s *Scene) Remove(e Entity) {
 
 // Update calls the Update method on all entities in the scene.
 // dt is the delta time in seconds since the last frame.
-func (s *Scene) Update(dt float64) {
+func (s *Scene) Update(dt float32) {
 	for _, e := range s.entities {
 		e.Update(dt)
 	}

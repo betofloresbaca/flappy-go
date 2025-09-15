@@ -53,9 +53,8 @@ func (g *Game) Cleanup() {
 // Run starts the main game loop.
 // This will block until the game window is closed.
 func (g *Game) Run() {
-	const deltaTime = 0.016 // 16ms for 60 FPS
-
 	for !rl.WindowShouldClose() {
+		deltaTime := rl.GetFrameTime()
 		if g.scene != nil {
 			// Update
 			g.scene.Update(deltaTime)

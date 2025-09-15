@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	// PlayerSize is the width and height of the player rectangle
-	PlayerSize = 20
+	PlayerSize     = 20
+	StartPositionX = 100
+	StartPositionY = 100
 )
 
 // Player represents the main player character in the game.
@@ -26,7 +27,7 @@ type Player struct {
 }
 
 // NewPlayer creates a new player entity at the specified position.
-func NewPlayer(x, y float32, color string) *Player {
+func NewPlayer(color string) *Player {
 	animatedSprite := components.NewAnimatedSprite()
 	for _, birdColor := range []string{"blue", "red", "yellow"} {
 		frames := assets.BirdSprites[birdColor]
@@ -37,7 +38,7 @@ func NewPlayer(x, y float32, color string) *Player {
 		BaseEntity:   core.NewBaseEntity(),
 		BaseDrawable: core.NewBaseDrawable(0),
 		transform: core.Transform{
-			Position: rl.Vector2{X: x, Y: y},
+			Position: rl.Vector2{X: StartPositionX, Y: StartPositionY},
 			Scale:    rl.Vector2{X: 1, Y: 1},
 			Rotation: 0,
 		},
@@ -47,24 +48,22 @@ func NewPlayer(x, y float32, color string) *Player {
 }
 
 // Update handles player input and movement.
-func (p *Player) Update(dt float64) {
-	// Call base implementation first
-	p.BaseEntity.Update(dt)
+func (p *Player) Update(dt float32) {
 	// Update animated sprite
 	p.animatedSprite.Update(dt)
 
 	// Handle player movement input
 	if rl.IsKeyDown(rl.KeyRight) || rl.IsKeyDown(rl.KeyD) {
-		p.transform.Position.X += p.speed * float32(dt)
+		p.transform.Position.X += p.speed * dt
 	}
 	if rl.IsKeyDown(rl.KeyLeft) || rl.IsKeyDown(rl.KeyA) {
-		p.transform.Position.X -= p.speed * float32(dt)
+		p.transform.Position.X -= p.speed * dt
 	}
 	if rl.IsKeyDown(rl.KeyUp) || rl.IsKeyDown(rl.KeyW) {
-		p.transform.Position.Y -= p.speed * float32(dt)
+		p.transform.Position.Y -= p.speed * dt
 	}
 	if rl.IsKeyDown(rl.KeyDown) || rl.IsKeyDown(rl.KeyS) {
-		p.transform.Position.Y += p.speed * float32(dt)
+		p.transform.Position.Y += p.speed * dt
 	}
 
 	// Keep player within screen bounds using raylib's Clamp function

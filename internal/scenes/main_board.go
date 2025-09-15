@@ -10,19 +10,19 @@ func CreateMainBoard() *core.Scene {
 
 	scene := core.NewScene()
 	// Add the player to the scene
-	player := entities.NewPlayer(40, 30, "blue")
+	player := entities.NewPlayer("blue")
 	scene.Add(player)
 	// Add the background to the scene
 	background := entities.NewBackground()
 	scene.Add(background)
 	// Add the ground to the scene
-	ground := entities.NewGround(440, speed)
+	ground := entities.NewGround(speed)
 	ground.Running = true
 	scene.Add(ground)
-	// Add a pipe gate to the scene
-	pipeGate := entities.NewPipeGate(800, 100, 100, speed)
-	pipeGate.Running = true
-	scene.Add(pipeGate)
+	// Add a pipe generator to the scene
+	pipeGenerator := entities.NewPipeGateGenerator(speed)
+	pipeGenerator.Running = true
+	scene.Add(pipeGenerator)
 	// Additional scene setup can be done here
 	return scene
 }

@@ -14,7 +14,7 @@ type Entity interface {
 	// OnRemove is called when the entity is removed from a scene.
 	OnRemove()
 	// Update is called every frame with the delta time in seconds.
-	Update(dt float64)
+	Update(dt float32)
 }
 
 var nextId uint64
@@ -42,7 +42,7 @@ func (e *BaseEntity) OnAdd() {}
 func (e *BaseEntity) OnRemove() {}
 
 // Update provides a default empty implementation of the Update method.
-func (e *BaseEntity) Update(deltaTime float64) {}
+func (e *BaseEntity) Update(deltaTime float32) {}
 
 // Drawable represents an entity that can be rendered to the screen.
 // Drawables are sorted by ZIndex before rendering.

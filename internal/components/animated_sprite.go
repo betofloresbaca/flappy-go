@@ -5,10 +5,10 @@ import "simple-go-game/internal/core"
 type animation struct {
 	name         string
 	sprites      []Sprite
-	frameTime    float64
+	frameTime    float32
 	loop         bool
 	currentFrame int
-	elapsedTime  float64
+	elapsedTime  float32
 	paused       bool
 }
 
@@ -24,7 +24,7 @@ func NewAnimatedSprite() *AnimatedSprite {
 }
 
 // AddAnimation ahora recibe los frames ([]byte) y los guarda como sprites en Animation
-func (as *AnimatedSprite) AddAnimation(name string, frames [][]byte, frameTime float64, loop bool) {
+func (as *AnimatedSprite) AddAnimation(name string, frames [][]byte, frameTime float32, loop bool) {
 	sprites := make([]Sprite, len(frames))
 	for i, data := range frames {
 		sprites[i] = *NewSprite(data, PivotCenter)
@@ -61,7 +61,7 @@ func (as *AnimatedSprite) Pause() {
 	}
 }
 
-func (as *AnimatedSprite) Update(dt float64) {
+func (as *AnimatedSprite) Update(dt float32) {
 	if as.currentAnimation == "" {
 		return
 	}

@@ -22,10 +22,6 @@ func NewBackground() *Background {
 	}
 }
 
-func (b *Background) Update(dt float64) {
-	b.BaseEntity.Update(dt)
-}
-
 func (b *Background) Draw() {
 	for i := range 3 {
 		b.sprite.Draw(core.Transform{
