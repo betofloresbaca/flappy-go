@@ -1,5 +1,4 @@
-// Package player provides the player entity implementation.
-package player
+package entities
 
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -35,9 +34,13 @@ func NewPlayer(x, y float32, color string) *Player {
 	}
 	animatedSprite.SetAnimation(color)
 	return &Player{
-		BaseEntity:     core.NewBaseEntity(),
-		BaseDrawable:   core.NewBaseDrawable(1), // Z-index 1 for player layer
-		transform:      core.Transform{Position: rl.Vector2{X: x, Y: y}, Scale: rl.Vector2{X: 1, Y: 1}, Rotation: 0},
+		BaseEntity:   core.NewBaseEntity(),
+		BaseDrawable: core.NewBaseDrawable(0),
+		transform: core.Transform{
+			Position: rl.Vector2{X: x, Y: y},
+			Scale:    rl.Vector2{X: 1, Y: 1},
+			Rotation: 0,
+		},
 		speed:          100.0, // pixels per second
 		animatedSprite: *animatedSprite,
 	}

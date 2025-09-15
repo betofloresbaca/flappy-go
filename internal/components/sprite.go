@@ -7,31 +7,64 @@ import (
 )
 
 type Sprite struct {
-	texture rl.Texture2D
+	Texture rl.Texture2D
+	Pivot   Pivot
+	FlipH   bool
+	FlipV   bool
 }
 
-// NewSpriteFromBytes crea un sprite desde datos []byte de imagen (PNG)
-func NewSpriteFromBytes(data []byte) *Sprite {
+// NewSprite creates a sprite from image data ([]byte, PNG) and a pivot
+func NewSprite(data []byte, pivot Pivot) *Sprite {
 	img := rl.LoadImageFromMemory(".png", data, int32(len(data)))
 	texture := rl.LoadTextureFromImage(img)
 	rl.UnloadImage(img)
-	return &Sprite{texture: texture}
+	return &Sprite{
+		Texture: texture,
+		Pivot:   pivot,
+		FlipH:   false,
+		FlipV:   false,
+	}
 }
 
 func (s *Sprite) Draw(transform core.Transform) {
+	width := float32(s.Texture.Width) * transform.Scale.X
+	height := float32(s.Texture.Height) * transform.Scale.Y
+	var origin rl.Vector2
+	switch s.Pivot {
+	case PivotUpLeft:
+		origin = rl.NewVector2(0, 0)
+	case PivotUpRight:
+		origin = rl.NewVector2(width, 0)
+	case PivotDownLeft:
+		origin = rl.NewVector2(0, height)
+	case PivotDownRight:
+		origin = rl.NewVector2(width, height)
+	case PivotCenter:
+		origin = rl.NewVector2(width/2, height/2)
+	}
+	// Calculate source rectangle considering FlipH and FlipV
+	srcX := float32(0)
+	srcY := float32(0)
+	srcW := float32(s.Texture.Width)
+	srcH := float32(s.Texture.Height)
+	if s.FlipH {
+		srcW = -srcW
+		srcX = float32(s.Texture.Width)
+	}
+	if s.FlipV {
+		srcH = -srcH
+		srcY = float32(s.Texture.Height)
+	}
 	rl.DrawTexturePro(
-		s.texture,
-		rl.NewRectangle(0, 0, float32(s.texture.Width), float32(s.texture.Height)), // source
+		s.Texture,
+		rl.NewRectangle(srcX, srcY, srcW, srcH), // source
 		rl.NewRectangle(
 			transform.Position.X,
 			transform.Position.Y,
-			float32(s.texture.Width)*transform.Scale.X,
-			float32(s.texture.Height)*transform.Scale.Y,
+			width,
+			height,
 		), // dest
-		rl.NewVector2(
-			float32(s.texture.Width)*transform.Scale.X/2,
-			float32(s.texture.Height)*transform.Scale.Y/2,
-		), // origin (center for rotation)
+		origin,
 		transform.Rotation,
 		rl.White,
 	)

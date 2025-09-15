@@ -55,7 +55,7 @@ var backgroundDay []byte
 //go:embed sprites/background-night.png
 var backgroundNight []byte
 
-var BackgroundImages = map[string][]byte{
+var BackgroundSprites = map[string][]byte{
 	"day":   backgroundDay,
 	"night": backgroundNight,
 }
@@ -120,10 +120,10 @@ var PipeSprites = map[string][]byte{
 	"red":   pipeRed,
 }
 
-// Base Sprite
+// Ground Sprite
 
-//go:embed sprites/base.png
-var BaseSprite []byte
+//go:embed sprites/ground.png
+var GroundSprite []byte
 
 // Miscellaneous Sprites
 

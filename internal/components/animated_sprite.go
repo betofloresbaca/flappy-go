@@ -27,7 +27,7 @@ func NewAnimatedSprite() *AnimatedSprite {
 func (as *AnimatedSprite) AddAnimation(name string, frames [][]byte, frameTime float64, loop bool) {
 	sprites := make([]Sprite, len(frames))
 	for i, data := range frames {
-		sprites[i] = *NewSpriteFromBytes(data)
+		sprites[i] = *NewSprite(data, PivotCenter)
 	}
 	as.animations[name] = animation{
 		name:      name,
