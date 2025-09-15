@@ -10,7 +10,7 @@ import (
 
 func main() {
 	// Create a new game instance
-	g := core.NewGame(860, 540, "Simple Go Game", 60)
+	g := core.NewGame(860, 540, "Flappy Go", 60)
 
 	// Ensure cleanup when the program exits
 	defer g.Cleanup()
