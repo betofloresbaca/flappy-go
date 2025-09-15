@@ -9,8 +9,11 @@ func GameBoard() *core.Scene {
 	var speed float32 = 100.0
 
 	scene := core.NewScene()
+	// Add the score display to the scene
+	scoreDisplay := entities.NewScoreDisplay()
+	scene.Add(scoreDisplay)
 	// Add the player to the scene
-	player := entities.NewPlayer("red")
+	player := entities.NewPlayer("red", scoreDisplay)
 	scene.Add(player)
 	// Add the background to the scene
 	background := entities.NewBackground("night")
@@ -23,6 +26,5 @@ func GameBoard() *core.Scene {
 	pipeGenerator := entities.NewPipeGateGenerator(speed)
 	pipeGenerator.Running = true
 	scene.Add(pipeGenerator)
-	// Additional scene setup can be done here
 	return scene
 }

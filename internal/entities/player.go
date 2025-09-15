@@ -9,14 +9,15 @@ import (
 )
 
 const (
-	Player_ZIndex         = 0
-	Player_Size           = 20
-	Player_StartPositionX = 150
-	Player_StartPositionY = 100
-	Player_Gravity        = 900.0
-	Player_MaxVelocityY   = 500.0
-	Player_JumpForce      = 300.0
-	Player_MaxRotation    = 75.0
+	Player_ZIndex             = 0
+	Player_Size               = 20
+	Player_StartPositionX     = 150
+	Player_StartPositionY     = 100
+	Player_Gravity            = 900.0
+	Player_MaxVelocityY       = 500.0
+	Player_JumpForce          = 300.0
+	Player_MaxRotation        = 75.0
+	Player_AnimationFrameTime = 0.2
 )
 
 // Player represents the main player character in the game.
@@ -30,14 +31,15 @@ type Player struct {
 	velocity       rl.Vector2
 	speed          float32
 	animatedSprite components.AnimatedSprite
+	score          *ScoreDisplay
 }
 
 // NewPlayer creates a new player entity at the specified position.
-func NewPlayer(color string) *Player {
+func NewPlayer(color string, score *ScoreDisplay) *Player {
 	animatedSprite := components.NewAnimatedSprite()
 	for _, birdColor := range []string{"blue", "red", "yellow"} {
 		frames := assets.BirdImages[birdColor]
-		animatedSprite.AddAnimation(birdColor, frames, 0.2, true)
+		animatedSprite.AddAnimation(birdColor, frames, Player_AnimationFrameTime, true)
 	}
 	animatedSprite.SetAnimation(color)
 	return &Player{
@@ -46,6 +48,7 @@ func NewPlayer(color string) *Player {
 		transform:      *core.NewTransform(Player_StartPositionX, Player_StartPositionY),
 		speed:          100.0, // pixels per second
 		animatedSprite: *animatedSprite,
+		score:          score,
 	}
 }
 
@@ -67,6 +70,7 @@ func (p *Player) applyGravity(dt float32) {
 func (p *Player) applyInputforce() {
 	if rl.IsKeyPressed(rl.KeySpace) || rl.IsMouseButtonPressed(rl.MouseLeftButton) {
 		p.velocity.Y = -Player_JumpForce
+		p.score.Increment()
 	}
 }
 
