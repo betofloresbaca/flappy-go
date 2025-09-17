@@ -3,6 +3,9 @@ package entities
 import (
 	"simple-go-game/internal/assets"
 	"simple-go-game/internal/core"
+	physics "simple-go-game/internal/core/physics"
+
+	raylib "github.com/gen2brain/raylib-go/raylib"
 )
 
 const (
@@ -17,6 +20,7 @@ type Ground struct {
 	speed   float32
 	offset  float32
 	Running bool
+	body    *physics.Body
 }
 
 func NewGround(speed float32) *Ground {
@@ -44,5 +48,34 @@ func (g *Ground) Draw() {
 		g.sprite.Draw(
 			*core.NewTransform(float32(i)*float32(g.sprite.Texture.Width)+g.offset, Ground_Y),
 		)
+	}
+}
+
+// OnAdd creates the static physics body for ground collision
+func (g *Ground) OnAdd() {
+	screenWidth := float32(raylib.GetScreenWidth())
+	screenHeight := float32(raylib.GetScreenHeight())
+
+	// Create a wide rectangle from Ground_Y to bottom of screen
+	groundHeight := screenHeight - Ground_Y
+	groundWidth := screenWidth
+
+	// Position at center of the ground area
+	centerX := groundWidth / 2
+	centerY := Ground_Y + groundHeight/2
+
+	// Create static body (density 0 makes it static)
+	g.body = physics.NewBodyRectangle(
+		raylib.Vector2{X: centerX, Y: centerY},
+		groundWidth,
+		groundHeight,
+		0, // density 0 = static body
+	)
+}
+
+// OnRemove cleans up the physics body
+func (g *Ground) OnRemove() {
+	if g.body != nil {
+		g.body.Destroy()
 	}
 }
