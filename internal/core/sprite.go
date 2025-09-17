@@ -1,8 +1,6 @@
-package components
+package core
 
 import (
-	"simple-go-game/internal/core"
-
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -28,7 +26,7 @@ func NewSprite(data []byte, pivot Pivot) *Sprite {
 	}
 }
 
-func (s *Sprite) Draw(transform core.Transform) {
+func (s *Sprite) Draw(transform Transform) {
 	width := float32(s.Texture.Width) * transform.Scale.X
 	height := float32(s.Texture.Height) * transform.Scale.Y
 	var origin rl.Vector2

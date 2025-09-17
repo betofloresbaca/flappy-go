@@ -2,7 +2,6 @@ package entities
 
 import (
 	"simple-go-game/internal/assets"
-	"simple-go-game/internal/components"
 	"simple-go-game/internal/core"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -17,8 +16,8 @@ const (
 type PipeGate struct {
 	*core.BaseEntity
 	*core.BaseDrawable
-	topSprite    components.Sprite
-	bottomSprite components.Sprite
+	topSprite    core.Sprite
+	bottomSprite core.Sprite
 	x            float32
 	gapY         float32
 	speed        float32
@@ -27,9 +26,9 @@ type PipeGate struct {
 }
 
 func NewPipeGate(x, speed float32) *PipeGate {
-	topSprite := components.NewSprite(assets.PipeSprites["green"], components.PivotDownLeft)
+	topSprite := core.NewSprite(assets.PipeSprites["green"], core.PivotDownLeft)
 	topSprite.FlipV = true
-	bottomSprite := components.NewSprite(assets.PipeSprites["green"], components.PivotUpLeft)
+	bottomSprite := core.NewSprite(assets.PipeSprites["green"], core.PivotUpLeft)
 
 	return &PipeGate{
 		BaseEntity:   core.NewBaseEntity(),

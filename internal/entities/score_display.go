@@ -3,7 +3,6 @@ package entities
 import (
 	"fmt"
 	"simple-go-game/internal/assets"
-	"simple-go-game/internal/components"
 	"simple-go-game/internal/core"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -18,15 +17,15 @@ type ScoreDisplay struct {
 	*core.BaseEntity
 	*core.BaseDrawable
 	value         int
-	numberSprites [10]components.Sprite
+	numberSprites [10]core.Sprite
 	numberWidth   float32
-	drawArray     []components.Sprite
+	drawArray     []core.Sprite
 }
 
 func NewScoreDisplay() *ScoreDisplay {
-	sprites := [10]components.Sprite{}
+	sprites := [10]core.Sprite{}
 	for i := range sprites {
-		sprites[i] = *components.NewSprite(assets.NumberImages[i], components.PivotUpLeft)
+		sprites[i] = *core.NewSprite(assets.NumberImages[i], core.PivotUpLeft)
 	}
 	score := ScoreDisplay{
 		BaseEntity:    core.NewBaseEntity(),

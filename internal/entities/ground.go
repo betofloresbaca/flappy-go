@@ -2,7 +2,6 @@ package entities
 
 import (
 	"simple-go-game/internal/assets"
-	"simple-go-game/internal/components"
 	"simple-go-game/internal/core"
 )
 
@@ -14,7 +13,7 @@ const (
 type Ground struct {
 	*core.BaseEntity
 	*core.BaseDrawable
-	sprite  components.Sprite
+	sprite  core.Sprite
 	speed   float32
 	offset  float32
 	Running bool
@@ -24,7 +23,7 @@ func NewGround(speed float32) *Ground {
 	return &Ground{
 		BaseEntity:   core.NewBaseEntity(),
 		BaseDrawable: core.NewBaseDrawable(Ground_ZIndex),
-		sprite:       *components.NewSprite(assets.GroundImage, components.PivotUpLeft),
+		sprite:       *core.NewSprite(assets.GroundImage, core.PivotUpLeft),
 		speed:        speed,
 	}
 }

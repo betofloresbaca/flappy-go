@@ -1,6 +1,4 @@
-package components
-
-import "simple-go-game/internal/core"
+package core
 
 type animation struct {
 	name         string
@@ -85,7 +83,7 @@ func (as *AnimatedSprite) Update(dt float32) {
 	as.animations[as.currentAnimation] = anim
 }
 
-func (as *AnimatedSprite) Draw(transform core.Transform) {
+func (as *AnimatedSprite) Draw(transform Transform) {
 	if as.currentAnimation == "" {
 		return
 	}

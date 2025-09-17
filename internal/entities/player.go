@@ -2,7 +2,6 @@ package entities
 
 import (
 	"simple-go-game/internal/assets"
-	"simple-go-game/internal/components"
 	"simple-go-game/internal/core"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -30,13 +29,13 @@ type Player struct {
 	transform      core.Transform
 	velocity       rl.Vector2
 	speed          float32
-	animatedSprite components.AnimatedSprite
+	animatedSprite core.AnimatedSprite
 	score          *ScoreDisplay
 }
 
 // NewPlayer creates a new player entity at the specified position.
 func NewPlayer(color string, score *ScoreDisplay) *Player {
-	animatedSprite := components.NewAnimatedSprite()
+	animatedSprite := core.NewAnimatedSprite()
 	for _, birdColor := range []string{"blue", "red", "yellow"} {
 		frames := assets.BirdImages[birdColor]
 		animatedSprite.AddAnimation(birdColor, frames, Player_AnimationFrameTime, true)
