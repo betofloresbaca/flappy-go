@@ -5,7 +5,7 @@ import (
 	"simple-go-game/internal/assets"
 	"simple-go-game/internal/core"
 
-	rl "github.com/gen2brain/raylib-go/raylib"
+	raylib "github.com/gen2brain/raylib-go/raylib"
 )
 
 const (
@@ -64,7 +64,7 @@ func (s *ScoreDisplay) calculateDrawArray() {
 func (s *ScoreDisplay) Draw() {
 	scoreStr := fmt.Sprintf("%d", s.value)
 	totalWidth := float32(len(scoreStr)) * s.numberWidth
-	startX := float32(rl.GetScreenWidth()/2) - totalWidth/2
+	startX := float32(raylib.GetScreenWidth()/2) - totalWidth/2
 
 	for i, sprite := range s.drawArray {
 		x := startX + float32(i)*s.numberWidth

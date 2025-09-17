@@ -3,12 +3,15 @@ package scenes
 import (
 	"simple-go-game/internal/core"
 	"simple-go-game/internal/entities"
+
+	raylib "github.com/gen2brain/raylib-go/raylib"
 )
 
 func GameBoard() *core.Scene {
 	var speed float32 = 100.0
 
-	scene := core.NewScene()
+	// Physics now runs in seconds; use player gravity constant (pixels/s^2)
+	scene := core.NewPhysicsScene(0, raylib.Vector2{X: 0, Y: 800}) // Gravity pointing downwards
 	// Add the score display to the scene
 	scoreDisplay := entities.NewScoreDisplay()
 	scene.Add(scoreDisplay)

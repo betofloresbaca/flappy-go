@@ -4,20 +4,45 @@ package core
 
 import (
 	"sort"
+
+	physics "simple-go-game/internal/core/physics"
+
+	raylib "github.com/gen2brain/raylib-go/raylib"
 )
 
 // Scene manages a collection of entities and handles their updates and rendering.
 // It provides efficient entity lookup and maintains the entity lifecycle.
 type Scene struct {
+	*BaseEntity
+	*BaseDrawable
 	entities      []Entity
 	entityIndices map[uint64]int
+	handlePhysics bool
+	gravity       raylib.Vector2
+	inTree        bool
 }
 
 // NewScene creates a new empty scene.
-func NewScene() *Scene {
+func NewScene(zIndex int) *Scene {
 	return &Scene{
+		BaseEntity:    NewBaseEntity(),
+		BaseDrawable:  NewBaseDrawable(zIndex),
 		entities:      make([]Entity, 0),
 		entityIndices: make(map[uint64]int),
+		handlePhysics: false,
+		inTree:        false,
+	}
+}
+
+// NewPhysicsScene creates a new empty physics scene.
+func NewPhysicsScene(zIndex int, gravity raylib.Vector2) *Scene {
+	return &Scene{
+		BaseEntity:    NewBaseEntity(),
+		entities:      make([]Entity, 0),
+		entityIndices: make(map[uint64]int),
+		handlePhysics: true,
+		gravity:       gravity,
+		inTree:        false,
 	}
 }
 
@@ -30,7 +55,9 @@ func (s *Scene) Add(e Entity) {
 
 	s.entities = append(s.entities, e)
 	s.entityIndices[e.Id()] = len(s.entities) - 1
-	e.OnAdd()
+	if s.inTree {
+		e.OnAdd()
+	}
 }
 
 // Remove removes an entity from the scene. If the entity is not in the scene, this is a no-op.
@@ -51,9 +78,22 @@ func (s *Scene) Remove(e Entity) {
 	e.OnRemove()
 }
 
+// EntityById returns the entity with the given ID, or nil if not found.
+// The second return value indicates whether the entity was found.
+func (s *Scene) EntityById(id uint64) (Entity, bool) {
+	idx, exists := s.entityIndices[id]
+	if !exists {
+		return nil, false
+	}
+	return s.entities[idx], true
+}
+
 // Update calls the Update method on all entities in the scene.
 // dt is the delta time in seconds since the last frame.
 func (s *Scene) Update(dt float32) {
+	if s.handlePhysics {
+		physics.Update()
+	}
 	for _, e := range s.entities {
 		e.Update(dt)
 	}
@@ -78,12 +118,25 @@ func (s *Scene) Draw() {
 	}
 }
 
-// EntityById returns the entity with the given ID, or nil if not found.
-// The second return value indicates whether the entity was found.
-func (s *Scene) EntityById(id uint64) (Entity, bool) {
-	idx, exists := s.entityIndices[id]
-	if !exists {
-		return nil, false
+func (s *Scene) OnAdd() {
+	if s.handlePhysics {
+		physics.Init()
+		physics.SetGravity(s.gravity.X, s.gravity.Y)
 	}
-	return s.entities[idx], true
+	s.inTree = true
+	for _, e := range s.entities {
+		e.OnAdd()
+	}
+}
+
+func (s *Scene) OnRemove() {
+	for _, e := range s.entities {
+		e.OnRemove()
+	}
+	if s.handlePhysics {
+		physics.Close()
+	}
+	s.entities = nil
+	s.entityIndices = nil
+	s.inTree = false
 }

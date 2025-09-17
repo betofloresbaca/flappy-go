@@ -1,7 +1,7 @@
 package core
 
 import (
-	rl "github.com/gen2brain/raylib-go/raylib"
+	raylib "github.com/gen2brain/raylib-go/raylib"
 )
 
 const (
@@ -9,7 +9,7 @@ const (
 )
 
 type Sprite struct {
-	Texture rl.Texture2D
+	Texture raylib.Texture2D
 	Pivot   Pivot
 	FlipH   bool
 	FlipV   bool
@@ -17,9 +17,9 @@ type Sprite struct {
 
 // NewSprite creates a sprite from image data ([]byte, PNG) and a pivot
 func NewSprite(data []byte, pivot Pivot) *Sprite {
-	img := rl.LoadImageFromMemory(Sprite_Format, data, int32(len(data)))
-	texture := rl.LoadTextureFromImage(img)
-	rl.UnloadImage(img)
+	img := raylib.LoadImageFromMemory(Sprite_Format, data, int32(len(data)))
+	texture := raylib.LoadTextureFromImage(img)
+	raylib.UnloadImage(img)
 	return &Sprite{
 		Texture: texture,
 		Pivot:   pivot,
@@ -29,18 +29,18 @@ func NewSprite(data []byte, pivot Pivot) *Sprite {
 func (s *Sprite) Draw(transform Transform) {
 	width := float32(s.Texture.Width) * transform.Scale.X
 	height := float32(s.Texture.Height) * transform.Scale.Y
-	var origin rl.Vector2
+	var origin raylib.Vector2
 	switch s.Pivot {
 	case PivotUpLeft:
-		origin = rl.NewVector2(0, 0)
+		origin = raylib.NewVector2(0, 0)
 	case PivotUpRight:
-		origin = rl.NewVector2(width, 0)
+		origin = raylib.NewVector2(width, 0)
 	case PivotDownLeft:
-		origin = rl.NewVector2(0, height)
+		origin = raylib.NewVector2(0, height)
 	case PivotDownRight:
-		origin = rl.NewVector2(width, height)
+		origin = raylib.NewVector2(width, height)
 	case PivotCenter:
-		origin = rl.NewVector2(width/2, height/2)
+		origin = raylib.NewVector2(width/2, height/2)
 	}
 	// Calculate source rectangle considering FlipH and FlipV
 	srcX := float32(0)
@@ -55,10 +55,10 @@ func (s *Sprite) Draw(transform Transform) {
 		srcH = -srcH
 		srcY = float32(s.Texture.Height)
 	}
-	rl.DrawTexturePro(
+	raylib.DrawTexturePro(
 		s.Texture,
-		rl.NewRectangle(srcX, srcY, srcW, srcH), // source
-		rl.NewRectangle(
+		raylib.NewRectangle(srcX, srcY, srcW, srcH), // source
+		raylib.NewRectangle(
 			transform.Position.X,
 			transform.Position.Y,
 			width,
@@ -66,6 +66,6 @@ func (s *Sprite) Draw(transform Transform) {
 		), // dest
 		origin,
 		transform.Rotation,
-		rl.White,
+		raylib.White,
 	)
 }

@@ -3,7 +3,7 @@ package entities
 import (
 	"simple-go-game/internal/core"
 
-	rl "github.com/gen2brain/raylib-go/raylib"
+	raylib "github.com/gen2brain/raylib-go/raylib"
 )
 
 const (
@@ -55,7 +55,7 @@ func (pg *PipeGateGenerator) Update(dt float32) {
 		pg.addPipe(PipeGateGenerator_XStart)
 	}
 	nextXStart := pg.getNextXStart()
-	for nextXStart < float32(rl.GetScreenWidth()+PipeGateGenerator_PreloadZoneWidth) {
+	for nextXStart < float32(raylib.GetScreenWidth()+PipeGateGenerator_PreloadZoneWidth) {
 		pg.addPipe(nextXStart)
 		nextXStart = pg.getNextXStart()
 	}

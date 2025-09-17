@@ -18,15 +18,15 @@ func NewBaseEntity() *BaseEntity {
 }
 
 // Id returns the unique identifier for this entity.
-func (e *BaseEntity) Id() uint64 {
+func (e BaseEntity) Id() uint64 {
 	return e.id
 }
 
 // OnAdd provides a default empty implementation of the OnAdd lifecycle method.
-func (e *BaseEntity) OnAdd() {}
+func (e BaseEntity) OnAdd() {}
 
 // OnRemove provides a default empty implementation of the OnRemove lifecycle method.
-func (e *BaseEntity) OnRemove() {}
+func (e BaseEntity) OnRemove() {}
 
 // Update provides a default empty implementation of the Update method.
-func (e *BaseEntity) Update(deltaTime float32) {}
+func (e BaseEntity) Update(deltaTime float32) {}

@@ -11,17 +11,10 @@ import (
 func main() {
 	// Create a new game instance
 	g := core.NewGame(860, 540, "Flappy Go", 60)
-
-	// Ensure cleanup when the program exits
-	defer g.Cleanup()
-
-	// Initialize the game window and resources
 	g.Initialize()
-
+	defer g.Cleanup()
 	// Create and set the main scene
-	mainScene := scenes.GameBoard()
-	g.SetScene(mainScene)
-
+	g.SetScene(scenes.GameBoard())
 	// Start the main game loop
 	g.Run()
 }

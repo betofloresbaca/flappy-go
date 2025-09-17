@@ -3,7 +3,7 @@
 package core
 
 import (
-	rl "github.com/gen2brain/raylib-go/raylib"
+	raylib "github.com/gen2brain/raylib-go/raylib"
 )
 
 // Game represents the main game instance.
@@ -34,38 +34,45 @@ func (g *Game) Scene() *Scene {
 
 // SetScene assigns a scene to the game instance.
 func (g *Game) SetScene(s *Scene) {
+	if g.scene != nil {
+		g.scene.OnRemove()
+	}
 	g.scene = s
+	g.scene.OnAdd()
 }
 
 // Initialize sets up the game window and initializes raylib.
 // This should be called before Run().
 func (g *Game) Initialize() {
-	rl.InitWindow(g.width, g.height, g.title)
-	rl.SetTargetFPS(g.fps)
-	rl.InitAudioDevice()
+	raylib.InitWindow(g.width, g.height, g.title)
+	raylib.SetTargetFPS(g.fps)
+	raylib.InitAudioDevice()
 }
 
 // Cleanup properly closes the game window and cleans up resources.
 // This should be called when the game is shutting down.
 func (g *Game) Cleanup() {
-	rl.CloseAudioDevice()
-	rl.CloseWindow()
+	if g.scene != nil {
+		g.scene.OnRemove()
+	}
+	raylib.CloseAudioDevice()
+	raylib.CloseWindow()
 }
 
 // Run starts the main game loop.
 // This will block until the game window is closed.
 func (g *Game) Run() {
-	for !rl.WindowShouldClose() {
-		deltaTime := rl.GetFrameTime()
+	for !raylib.WindowShouldClose() {
+		deltaTime := raylib.GetFrameTime()
 		if g.scene != nil {
 			// Update
 			g.scene.Update(deltaTime)
 
 			// Render
-			rl.BeginDrawing()
-			rl.ClearBackground(rl.RayWhite)
+			raylib.BeginDrawing()
+			raylib.ClearBackground(raylib.RayWhite)
 			g.scene.Draw()
-			rl.EndDrawing()
+			raylib.EndDrawing()
 		}
 	}
 }

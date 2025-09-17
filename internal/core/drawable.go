@@ -20,9 +20,9 @@ func NewBaseDrawable(zIndex int) *BaseDrawable {
 }
 
 // ZIndex returns the rendering layer index for this drawable.
-func (d *BaseDrawable) ZIndex() int {
+func (d BaseDrawable) ZIndex() int {
 	return d.zIndex
 }
 
 // Draw provides a default empty implementation of the Draw method.
-func (d *BaseDrawable) Draw() {}
+func (d BaseDrawable) Draw() {}

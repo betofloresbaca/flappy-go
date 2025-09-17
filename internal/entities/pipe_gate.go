@@ -4,7 +4,7 @@ import (
 	"simple-go-game/internal/assets"
 	"simple-go-game/internal/core"
 
-	rl "github.com/gen2brain/raylib-go/raylib"
+	raylib "github.com/gen2brain/raylib-go/raylib"
 )
 
 const (
@@ -36,7 +36,7 @@ func NewPipeGate(x, speed float32) *PipeGate {
 		topSprite:    *topSprite,
 		bottomSprite: *bottomSprite,
 		x:            x,
-		gapY:         float32(rl.GetRandomValue(PipeGate_GapYMin, PipeGate_GapYMax)),
+		gapY:         float32(raylib.GetRandomValue(PipeGate_GapYMin, PipeGate_GapYMax)),
 		speed:        speed,
 	}
 }
