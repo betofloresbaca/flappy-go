@@ -11,6 +11,7 @@ import (
 type Scene struct {
 	entities      []Entity
 	entityIndices map[uint64]int
+	PhysicsSystem PhysicsSystem
 }
 
 // NewScene creates a new empty scene.
@@ -18,6 +19,7 @@ func NewScene() *Scene {
 	return &Scene{
 		entities:      make([]Entity, 0),
 		entityIndices: make(map[uint64]int),
+		PhysicsSystem: *NewPhysicsSystem(),
 	}
 }
 
@@ -30,7 +32,7 @@ func (s *Scene) Add(e Entity) {
 
 	s.entities = append(s.entities, e)
 	s.entityIndices[e.Id()] = len(s.entities) - 1
-	e.OnAdd()
+	e.OnAdd(s)
 }
 
 // Remove removes an entity from the scene. If the entity is not in the scene, this is a no-op.
@@ -48,7 +50,7 @@ func (s *Scene) Remove(e Entity) {
 	s.entityIndices[lastEntity.Id()] = idxToRemove
 	s.entities = s.entities[:lastIndex]
 	delete(s.entityIndices, idToRemove)
-	e.OnRemove()
+	e.OnRemove(s)
 }
 
 // Update calls the Update method on all entities in the scene.

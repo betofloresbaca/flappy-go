@@ -2,7 +2,6 @@ package entities
 
 import (
 	"simple-go-game/internal/assets"
-	"simple-go-game/internal/components"
 	"simple-go-game/internal/core"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -17,48 +16,85 @@ const (
 type PipeGate struct {
 	*core.BaseEntity
 	*core.BaseDrawable
-	topSprite    components.Sprite
-	bottomSprite components.Sprite
-	x            float32
-	gapY         float32
-	speed        float32
-	Passed       bool
-	Running      bool
+	topSprite      core.Sprite
+	bottomSprite   core.Sprite
+	x              float32
+	gapY           float32
+	speed          float32
+	Passed         bool
+	Running        bool
+	topCollider    core.Collider
+	bottomCollider core.Collider
+	physicsSystem  *core.PhysicsSystem
 }
 
 func NewPipeGate(x, speed float32) *PipeGate {
-	topSprite := components.NewSprite(assets.PipeSprites["green"], components.PivotDownLeft)
+	topSprite := core.NewSprite(assets.PipeSprites["green"], core.PivotDownLeft)
 	topSprite.FlipV = true
-	bottomSprite := components.NewSprite(assets.PipeSprites["green"], components.PivotUpLeft)
+	bottomSprite := core.NewSprite(assets.PipeSprites["green"], core.PivotUpLeft)
+
+	pipeWidth := float32(topSprite.Texture.Width)
+	pipeHeight := float32(topSprite.Texture.Height)
 
 	return &PipeGate{
-		BaseEntity:   core.NewBaseEntity(),
-		BaseDrawable: core.NewBaseDrawable(0),
-		topSprite:    *topSprite,
-		bottomSprite: *bottomSprite,
-		x:            x,
-		gapY:         float32(rl.GetRandomValue(PipeGate_GapYMin, PipeGate_GapYMax)),
-		speed:        speed,
+		BaseEntity:     core.NewBaseEntity(),
+		BaseDrawable:   core.NewBaseDrawable(0),
+		topSprite:      *topSprite,
+		bottomSprite:   *bottomSprite,
+		x:              x,
+		gapY:           float32(rl.GetRandomValue(PipeGate_GapYMin, PipeGate_GapYMax)),
+		speed:          speed,
+		topCollider:    *core.NewRectangleCollider(pipeWidth, pipeHeight, "pipe", []string{"player"}),
+		bottomCollider: *core.NewRectangleCollider(pipeWidth, pipeHeight, "pipe", []string{"player"}),
 	}
 }
 
-func (p *PipeGate) Update(dt float32) {
-	if !p.Running {
+func (pg PipeGate) OnAdd(scene *core.Scene) {
+	pg.physicsSystem = &scene.PhysicsSystem
+	if pg.physicsSystem != nil {
+		pg.physicsSystem.Register(pg)
+	}
+}
+
+func (pg PipeGate) OnRemove(scene *core.Scene) {
+	if pg.physicsSystem != nil {
+		pg.physicsSystem.Unregister(pg)
+	}
+}
+
+func (pg PipeGate) Update(dt float32) {
+	if !pg.Running {
 		return
 	}
 	// Move the pipes to the left
-	p.x -= p.speed * float32(dt)
-	if p.x < -float32(p.topSprite.Texture.Width) {
-		p.Passed = true
+	pg.x -= pg.speed * float32(dt)
+	if pg.x < -float32(pg.topSprite.Texture.Width) {
+		pg.Passed = true
 	}
 }
 
-func (p *PipeGate) Draw() {
+func (pg PipeGate) Draw() {
 	// Draw top pipe (above the gap)
-	topY := p.gapY - float32(PipeGate_GapHeight/2)
-	p.topSprite.Draw(*core.NewTransform(p.x, topY))
+	topY := pg.gapY - float32(PipeGate_GapHeight/2)
+	pg.topSprite.Draw(*core.NewTransform(pg.x, topY))
 
 	// Draw bottom pipe (below the gap)
-	bottomY := p.gapY + float32(PipeGate_GapHeight/2)
-	p.bottomSprite.Draw(*core.NewTransform(p.x, bottomY))
+	bottomY := pg.gapY + float32(PipeGate_GapHeight/2)
+	pg.bottomSprite.Draw(*core.NewTransform(pg.x, bottomY))
+}
+
+// GetCollider implements core.Collidable.
+func (pg PipeGate) GetCollider() *core.Collider {
+	return &pg.topCollider
+}
+
+// GetTransform implements core.Collidable.
+func (pg PipeGate) GetTransform() *core.Transform {
+	topY := pg.gapY - float32(PipeGate_GapHeight/2)
+	return core.NewTransform(pg.x, topY)
+}
+
+// OnCollision handles collision events (pipes don't need to react to collisions)
+func (pg PipeGate) OnCollision(other core.Collidable, collision core.CollisionInfo) {
+	// Pipes don't need to react to collisions, the other entity will handle it
 }

@@ -2,7 +2,6 @@ package entities
 
 import (
 	"simple-go-game/internal/assets"
-	"simple-go-game/internal/components"
 	"simple-go-game/internal/core"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -30,13 +29,14 @@ type Player struct {
 	transform      core.Transform
 	velocity       rl.Vector2
 	speed          float32
-	animatedSprite components.AnimatedSprite
+	animatedSprite core.AnimatedSprite
 	score          *ScoreDisplay
+	collider       core.Collider
 }
 
 // NewPlayer creates a new player entity at the specified position.
 func NewPlayer(color string, score *ScoreDisplay) *Player {
-	animatedSprite := components.NewAnimatedSprite()
+	animatedSprite := core.NewAnimatedSprite()
 	for _, birdColor := range []string{"blue", "red", "yellow"} {
 		frames := assets.BirdImages[birdColor]
 		animatedSprite.AddAnimation(birdColor, frames, Player_AnimationFrameTime, true)
@@ -49,6 +49,7 @@ func NewPlayer(color string, score *ScoreDisplay) *Player {
 		speed:          100.0, // pixels per second
 		animatedSprite: *animatedSprite,
 		score:          score,
+		collider:       *core.NewCircleCollider(Player_Size/2, "player", []string{"pipe", "ground"}),
 	}
 }
 
@@ -91,4 +92,45 @@ func (p *Player) updatePosition(dt float32) {
 // Draw renders the player to the screen.
 func (p *Player) Draw() {
 	p.animatedSprite.Draw(p.transform)
+}
+
+// GetCollider returns the player's collider
+func (p *Player) GetCollider() interface{} {
+	return p.collider
+}
+
+// GetTransform returns the player's transform
+func (p *Player) GetTransform() *core.Transform {
+	return &p.transform
+}
+
+// OnPipeCollision handles collision with pipes
+func (p *Player) OnPipeCollision() {
+	// Reset player position on pipe collision
+	p.transform.Position.X = Player_StartPositionX
+	p.transform.Position.Y = Player_StartPositionY
+	p.velocity = rl.Vector2{X: 0, Y: 0}
+	// Could also trigger game over state here
+}
+
+// OnGroundCollision handles collision with ground
+func (p *Player) OnGroundCollision() {
+	// Stop downward velocity when hitting ground
+	if p.velocity.Y > 0 {
+		p.velocity.Y = 0
+	}
+	// Keep player above ground
+	screenHeight := float32(rl.GetScreenHeight())
+	groundHeight := float32(112) // Assuming ground sprite height
+	p.transform.Position.Y = screenHeight - groundHeight - Player_Size
+}
+
+// OnCollision handles generic collision events using the new layer system
+func (p *Player) OnCollision(other core.Collidable, collision core.CollisionInfo) {
+	switch collision.OtherLayer {
+	case "pipe":
+		p.OnPipeCollision()
+	case "ground":
+		p.OnGroundCollision()
+	}
 }

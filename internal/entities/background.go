@@ -2,27 +2,26 @@ package entities
 
 import (
 	"simple-go-game/internal/assets"
-	"simple-go-game/internal/components"
 	"simple-go-game/internal/core"
 )
 
 const (
 	Background_ZIndex       = -1000
-	Background_SpritePivot  = components.PivotUpLeft
+	Background_SpritePivot  = core.PivotUpLeft
 	Background_ImagesNumber = 3
 )
 
 type Background struct {
 	*core.BaseEntity
 	*core.BaseDrawable
-	sprite components.Sprite
+	sprite core.Sprite
 }
 
 func NewBackground(style string) *Background {
 	return &Background{
 		BaseEntity:   core.NewBaseEntity(),
 		BaseDrawable: core.NewBaseDrawable(Background_ZIndex),
-		sprite:       *components.NewSprite(assets.BackgroundImages[style], Background_SpritePivot),
+		sprite:       *core.NewSprite(assets.BackgroundImages[style], Background_SpritePivot),
 	}
 }
 

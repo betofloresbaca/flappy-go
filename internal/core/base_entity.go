@@ -23,10 +23,10 @@ func (e *BaseEntity) Id() uint64 {
 }
 
 // OnAdd provides a default empty implementation of the OnAdd lifecycle method.
-func (e *BaseEntity) OnAdd() {}
+func (e BaseEntity) OnAdd(scene *Scene) {}
 
 // OnRemove provides a default empty implementation of the OnRemove lifecycle method.
-func (e *BaseEntity) OnRemove() {}
+func (e BaseEntity) OnRemove(scene *Scene) {}
 
 // Update provides a default empty implementation of the Update method.
-func (e *BaseEntity) Update(deltaTime float32) {}
+func (e BaseEntity) Update(deltaTime float32) {}

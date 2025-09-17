@@ -7,7 +7,6 @@ import (
 )
 
 const (
-	PipeGateGenerator_ZIndex           = -300
 	PipeGateGenerator_HSpacing         = 150
 	PipeGateGenerator_XStart           = 400
 	PipeGateGenerator_PreloadZoneWidth = 100
@@ -15,25 +14,24 @@ const (
 
 type PipeGateGenerator struct {
 	*core.BaseEntity
-	*core.BaseDrawable
 	speed     float32
-	pipeGates []PipeGate
+	pipeGates []*PipeGate
 	Running   bool
+	physics   *core.PhysicsSystem
 }
 
 func NewPipeGateGenerator(speed float32) *PipeGateGenerator {
 	return &PipeGateGenerator{
-		BaseEntity:   core.NewBaseEntity(),
-		BaseDrawable: core.NewBaseDrawable(PipeGateGenerator_ZIndex),
-		speed:        speed,
-		pipeGates:    make([]PipeGate, 0),
+		BaseEntity: core.NewBaseEntity(),
+		speed:      speed,
+		pipeGates:  make([]*PipeGate, 0),
 	}
 }
 
 func (pg *PipeGateGenerator) addPipe(x float32) {
 	newPipe := NewPipeGate(x, pg.speed)
 	newPipe.Running = true
-	pg.pipeGates = append(pg.pipeGates, *newPipe)
+	pg.pipeGates = append(pg.pipeGates, newPipe)
 }
 
 func (pg *PipeGateGenerator) Update(dt float32) {
@@ -41,11 +39,16 @@ func (pg *PipeGateGenerator) Update(dt float32) {
 		return
 	}
 	// Update existing pipes
-	activePipes := make([]PipeGate, 0, len(pg.pipeGates))
+	activePipes := make([]*PipeGate, 0, len(pg.pipeGates))
 	for i := range pg.pipeGates {
 		pg.pipeGates[i].Update(dt)
 		if !pg.pipeGates[i].Passed {
 			activePipes = append(activePipes, pg.pipeGates[i])
+		} else {
+			// Unregister passed pipes from physics system
+			if pg.physics != nil {
+				pg.physics.Unregister(pg.pipeGates[i])
+			}
 		}
 	}
 	pg.pipeGates = activePipes
@@ -67,10 +70,4 @@ func (pg *PipeGateGenerator) getNextXStart() float32 {
 	return lastPipeX +
 		PipeGateGenerator_HSpacing +
 		float32(pg.pipeGates[len(pg.pipeGates)-1].topSprite.Texture.Width)
-}
-
-func (pg *PipeGateGenerator) Draw() {
-	for _, pipe := range pg.pipeGates {
-		pipe.Draw()
-	}
 }
