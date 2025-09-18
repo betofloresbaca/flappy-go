@@ -86,6 +86,8 @@ type Body struct {
 	FreezeOrient bool
 	// Physics body shape information (type, radius, vertices, normals)
 	Shape Shape
+	// Tag identifier for specific body identification
+	Tag string
 	// Collision callback function
 	OnCollision func(other *Body)
 }
@@ -179,7 +181,7 @@ func SetGravity(x, y float32) {
 }
 
 // NewBodyCircle - Creates a new circle physics body with generic parameters
-func NewBodyCircle(pos rl.Vector2, radius, density float32) *Body {
+func NewBodyCircle(tag string, pos rl.Vector2, radius, density float32) *Body {
 	newID := findAvailableBodyIndex()
 	if newID < 0 {
 		return nil
@@ -207,6 +209,7 @@ func NewBodyCircle(pos rl.Vector2, radius, density float32) *Body {
 		UseGravity:      true,
 		IsGrounded:      false,
 		FreezeOrient:    false,
+		Tag:             tag,
 	}
 
 	newBody.Shape.Body = newBody
@@ -223,7 +226,7 @@ func NewBodyCircle(pos rl.Vector2, radius, density float32) *Body {
 }
 
 // NewBodyRectangle - Creates a new rectangle physics body with generic parameters
-func NewBodyRectangle(pos rl.Vector2, width, height, density float32) *Body {
+func NewBodyRectangle(tag string, pos rl.Vector2, width, height, density float32) *Body {
 	newID := findAvailableBodyIndex()
 	if newID < 0 {
 		return nil
@@ -250,6 +253,7 @@ func NewBodyRectangle(pos rl.Vector2, width, height, density float32) *Body {
 		UseGravity:      true,
 		IsGrounded:      false,
 		FreezeOrient:    false,
+		Tag:             tag,
 	}
 
 	// Calculate centroid and moment of inertia
@@ -300,7 +304,7 @@ func NewBodyRectangle(pos rl.Vector2, width, height, density float32) *Body {
 }
 
 // NewBodyPolygon - Creates a new polygon physics body with generic parameters
-func NewBodyPolygon(pos rl.Vector2, radius float32, sides int, density float32) *Body {
+func NewBodyPolygon(tag string, pos rl.Vector2, radius float32, sides int, density float32) *Body {
 	newID := findAvailableBodyIndex()
 	if newID < 0 {
 		return nil
@@ -327,6 +331,7 @@ func NewBodyPolygon(pos rl.Vector2, radius float32, sides int, density float32) 
 		UseGravity:      true,
 		IsGrounded:      false,
 		FreezeOrient:    false,
+		Tag:             tag,
 	}
 
 	newBody.Shape.Body = newBody
@@ -447,7 +452,7 @@ func Shatter(body *Body, position rl.Vector2, force float32) {
 		center = rl.Vector2Add(bodyPos, center)
 		offset := rl.Vector2Subtract(center, bodyPos)
 
-		var newBody *Body = NewBodyPolygon(center, 10, 3, 10)
+		var newBody *Body = NewBodyPolygon("shard", center, 10, 3, 10)
 		var newData Polygon = Polygon{}
 		newData.VertexCount = 3
 		newData.Positions[0] = rl.Vector2Subtract(vertices[i], offset)
@@ -593,11 +598,6 @@ func (b *Body) SetRotation(radians float32) {
 	if b.Shape.Type == PolygonShape {
 		b.Shape.Transform = rl.Mat2Radians(radians)
 	}
-}
-
-// SetOnCollision - Asigna una función callback que se ejecutará en una colisión.
-func (b *Body) SetOnCollision(handler func(other *Body)) {
-	b.OnCollision = handler
 }
 
 // Destroy - Unitializes and destroy a physics body

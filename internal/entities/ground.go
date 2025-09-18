@@ -66,6 +66,7 @@ func (g *Ground) OnAdd() {
 
 	// Create static body (density 0 makes it static)
 	g.body = physics.NewBodyRectangle(
+		"Ground",
 		raylib.Vector2{X: centerX, Y: centerY},
 		groundWidth,
 		groundHeight,

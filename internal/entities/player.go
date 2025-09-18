@@ -106,12 +106,12 @@ func (p *Player) Draw() {
 // Override onadd y on remove
 func (p *Player) OnAdd() {
 	// Densidad reducida para hacer más sensibles los impulsos
-	p.body = physics.NewBodyRectangle(p.transform.Position, Player_Size, Player_Size, 1)
+	p.body = physics.NewBodyRectangle("Player", p.transform.Position, Player_Size, Player_Size, 1)
 
 	// Configurar callback de colisión para logging
-	p.body.SetOnCollision(func(other *physics.Body) {
-		log.Printf("Player collision detected with body ID: %d", other.ID)
-	})
+	p.body.OnCollision = func(other *physics.Body) {
+		log.Printf("Player collision detected with: %v", other.Tag)
+	}
 }
 
 func (p *Player) OnRemove() {

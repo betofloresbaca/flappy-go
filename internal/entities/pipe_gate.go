@@ -97,6 +97,7 @@ func (pg *PipeGate) OnAdd() {
 	topCenterX := pg.initialX + pipeWidth/2
 	topCenterY := (pg.gapY - float32(PipeGate_GapHeight/2)) - pipeHeight/2
 	pg.topBody = physics.NewBodyRectangle(
+		"PipeGate",
 		raylib.Vector2{X: topCenterX, Y: topCenterY},
 		pipeWidth,
 		pipeHeight,
@@ -108,6 +109,7 @@ func (pg *PipeGate) OnAdd() {
 	bottomCenterX := pg.initialX + pipeWidth/2
 	bottomCenterY := (pg.gapY + float32(PipeGate_GapHeight/2)) + pipeHeight/2
 	pg.bottomBody = physics.NewBodyRectangle(
+		"PipeGate",
 		raylib.Vector2{X: bottomCenterX, Y: bottomCenterY},
 		pipeWidth,
 		pipeHeight,
