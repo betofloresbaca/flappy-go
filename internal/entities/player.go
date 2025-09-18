@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"log"
 	"simple-go-game/internal/assets"
 	"simple-go-game/internal/core"
 
@@ -106,6 +107,11 @@ func (p *Player) Draw() {
 func (p *Player) OnAdd() {
 	// Densidad reducida para hacer más sensibles los impulsos
 	p.body = physics.NewBodyRectangle(p.transform.Position, Player_Size, Player_Size, 1)
+
+	// Configurar callback de colisión para logging
+	p.body.SetOnCollision(func(other *physics.Body) {
+		log.Printf("Player collision detected with body ID: %d", other.ID)
+	})
 }
 
 func (p *Player) OnRemove() {

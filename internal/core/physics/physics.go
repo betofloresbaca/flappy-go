@@ -86,6 +86,8 @@ type Body struct {
 	FreezeOrient bool
 	// Physics body shape information (type, radius, vertices, normals)
 	Shape Shape
+	// Collision callback function
+	OnCollision func(other *Body)
 }
 
 // Manifold type
@@ -593,6 +595,11 @@ func (b *Body) SetRotation(radians float32) {
 	}
 }
 
+// SetOnCollision - Asigna una función callback que se ejecutará en una colisión.
+func (b *Body) SetOnCollision(handler func(other *Body)) {
+	b.OnCollision = handler
+}
+
 // Destroy - Unitializes and destroy a physics body
 func (b *Body) Destroy() {
 	id := b.ID
@@ -922,6 +929,19 @@ func solveManifold(manifold *Manifold) {
 	// is not set yet in previous manifolds
 	if !manifold.BodyB.IsGrounded {
 		manifold.BodyB.IsGrounded = manifold.Normal.Y < 0
+	}
+
+	// If the collision is real (there are contact points), trigger the callbacks.
+	if manifold.ContactsCount > 0 {
+		// Call BodyA's callback, if it exists, passing BodyB
+		if manifold.BodyA.OnCollision != nil {
+			manifold.BodyA.OnCollision(manifold.BodyB)
+		}
+
+		// Call BodyB's callback, if it exists, passing BodyA
+		if manifold.BodyB.OnCollision != nil {
+			manifold.BodyB.OnCollision(manifold.BodyA)
+		}
 	}
 }
 
