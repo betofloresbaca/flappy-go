@@ -35,7 +35,7 @@ type Player struct {
 }
 
 // NewPlayer creates a new player entity at the specified position.
-func NewPlayer(color string, score *ScoreDisplay) *Player {
+func NewPlayer(parent *core.Scene, color string, score *ScoreDisplay) *Player {
 	animatedSprite := core.NewAnimatedSprite()
 	for _, birdColor := range []string{"blue", "red", "yellow"} {
 		frames := assets.BirdImages[birdColor]
@@ -43,7 +43,7 @@ func NewPlayer(color string, score *ScoreDisplay) *Player {
 	}
 	animatedSprite.SetAnimation(color)
 	return &Player{
-		BaseEntity:     core.NewBaseEntity(),
+		BaseEntity:     core.NewBaseEntity(parent),
 		BaseDrawable:   core.NewBaseDrawable(Player_ZIndex),
 		transform:      *core.NewTransform(Player_StartPositionX, Player_StartPositionY),
 		speed:          100.0, // pixels per second
@@ -105,7 +105,7 @@ func (p *Player) Draw() {
 // Override onadd y on remove
 func (p *Player) OnAdd() {
 	// Densidad reducida para hacer más sensibles los impulsos
-	p.body = physics.NewBodyRectangle(p.transform.Position, Player_Size, Player_Size, 10)
+	p.body = physics.NewBodyRectangle(p.transform.Position, Player_Size, Player_Size, 1)
 }
 
 func (p *Player) OnRemove() {

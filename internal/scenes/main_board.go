@@ -11,22 +11,22 @@ func GameBoard() *core.Scene {
 	var speed float32 = 100.0
 
 	// Physics now runs in seconds; use player gravity constant (pixels/s^2)
-	scene := core.NewPhysicsScene(0, raylib.Vector2{X: 0, Y: 800}) // Gravity pointing downwards
+	scene := core.NewPhysicsScene(nil, 0, raylib.Vector2{X: 0, Y: 800}) // Gravity pointing downwards
 	// Add the score display to the scene
-	scoreDisplay := entities.NewScoreDisplay()
+	scoreDisplay := entities.NewScoreDisplay(scene)
 	scene.Add(scoreDisplay)
 	// Add the player to the scene
-	player := entities.NewPlayer("red", scoreDisplay)
+	player := entities.NewPlayer(scene, "red", scoreDisplay)
 	scene.Add(player)
 	// Add the background to the scene
-	background := entities.NewBackground("night")
+	background := entities.NewBackground(scene, "night")
 	scene.Add(background)
 	// Add the ground to the scene
-	ground := entities.NewGround(speed)
+	ground := entities.NewGround(scene, speed)
 	ground.Running = true
 	scene.Add(ground)
 	// Add a pipe generator to the scene
-	pipeGenerator := entities.NewPipeGateGenerator(speed)
+	pipeGenerator := entities.NewPipeGateGenerator(scene, speed)
 	pipeGenerator.Running = true
 	scene.Add(pipeGenerator)
 	return scene

@@ -23,9 +23,9 @@ type Ground struct {
 	body    *physics.Body
 }
 
-func NewGround(speed float32) *Ground {
+func NewGround(parent *core.Scene, speed float32) *Ground {
 	return &Ground{
-		BaseEntity:   core.NewBaseEntity(),
+		BaseEntity:   core.NewBaseEntity(parent),
 		BaseDrawable: core.NewBaseDrawable(Ground_ZIndex),
 		sprite:       *core.NewSprite(assets.GroundImage, core.PivotUpLeft),
 		speed:        speed,

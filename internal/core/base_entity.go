@@ -9,12 +9,13 @@ var nextId uint64
 // BaseEntity provides a basic implementation of the Entity interface.
 // It handles ID generation and provides default empty implementations of lifecycle methods.
 type BaseEntity struct {
-	id uint64
+	id     uint64
+	Parent *Scene
 }
 
 // NewBaseEntity creates a new BaseEntity with a unique ID.
-func NewBaseEntity() *BaseEntity {
-	return &BaseEntity{id: atomic.AddUint64(&nextId, 1)}
+func NewBaseEntity(parent *Scene) *BaseEntity {
+	return &BaseEntity{id: atomic.AddUint64(&nextId, 1), Parent: parent}
 }
 
 // Id returns the unique identifier for this entity.

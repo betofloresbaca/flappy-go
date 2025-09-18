@@ -23,9 +23,9 @@ type Scene struct {
 }
 
 // NewScene creates a new empty scene.
-func NewScene(zIndex int) *Scene {
+func NewScene(parent *Scene, zIndex int) *Scene {
 	return &Scene{
-		BaseEntity:    NewBaseEntity(),
+		BaseEntity:    NewBaseEntity(parent),
 		BaseDrawable:  NewBaseDrawable(zIndex),
 		entities:      make([]Entity, 0),
 		entityIndices: make(map[uint64]int),
@@ -35,9 +35,9 @@ func NewScene(zIndex int) *Scene {
 }
 
 // NewPhysicsScene creates a new empty physics scene.
-func NewPhysicsScene(zIndex int, gravity raylib.Vector2) *Scene {
+func NewPhysicsScene(parent *Scene, zIndex int, gravity raylib.Vector2) *Scene {
 	return &Scene{
-		BaseEntity:    NewBaseEntity(),
+		BaseEntity:    NewBaseEntity(parent),
 		entities:      make([]Entity, 0),
 		entityIndices: make(map[uint64]int),
 		handlePhysics: true,

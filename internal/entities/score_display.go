@@ -22,13 +22,13 @@ type ScoreDisplay struct {
 	drawArray     []core.Sprite
 }
 
-func NewScoreDisplay() *ScoreDisplay {
+func NewScoreDisplay(parent *core.Scene) *ScoreDisplay {
 	sprites := [10]core.Sprite{}
 	for i := range sprites {
 		sprites[i] = *core.NewSprite(assets.NumberImages[i], core.PivotUpLeft)
 	}
 	score := ScoreDisplay{
-		BaseEntity:    core.NewBaseEntity(),
+		BaseEntity:    core.NewBaseEntity(parent),
 		BaseDrawable:  core.NewBaseDrawable(ScoreDisplay_ZIndex),
 		value:         0,
 		numberSprites: sprites,

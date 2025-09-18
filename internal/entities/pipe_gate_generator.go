@@ -7,7 +7,6 @@ import (
 )
 
 const (
-	PipeGateGenerator_ZIndex           = -300
 	PipeGateGenerator_HSpacing         = 150
 	PipeGateGenerator_XStart           = 400
 	PipeGateGenerator_PreloadZoneWidth = 100
@@ -15,62 +14,47 @@ const (
 
 type PipeGateGenerator struct {
 	*core.BaseEntity
-	*core.BaseDrawable
-	speed     float32
-	pipeGates []PipeGate
-	Running   bool
+	speed        float32
+	lastPipeGate *PipeGate
+	Running      bool
 }
 
-func NewPipeGateGenerator(speed float32) *PipeGateGenerator {
+func NewPipeGateGenerator(parent *core.Scene, speed float32) *PipeGateGenerator {
 	return &PipeGateGenerator{
-		BaseEntity:   core.NewBaseEntity(),
-		BaseDrawable: core.NewBaseDrawable(PipeGateGenerator_ZIndex),
-		speed:        speed,
-		pipeGates:    make([]PipeGate, 0),
+		BaseEntity: core.NewBaseEntity(parent),
+		speed:      speed,
 	}
 }
 
-func (pg *PipeGateGenerator) addPipe(x float32) {
-	newPipe := NewPipeGate(x, pg.speed)
+func (pgg *PipeGateGenerator) addPipe(x float32) {
+	newPipe := NewPipeGate(pgg.BaseEntity.Parent, x, pgg.speed)
 	newPipe.Running = true
-	pg.pipeGates = append(pg.pipeGates, *newPipe)
+	pgg.lastPipeGate = newPipe
+	pgg.BaseEntity.Parent.Add(newPipe)
 }
 
-func (pg *PipeGateGenerator) Update(dt float32) {
-	if !pg.Running {
+func (pgg *PipeGateGenerator) Update(dt float32) {
+	if !pgg.Running {
 		return
 	}
-	// Update existing pipes
-	activePipes := make([]PipeGate, 0, len(pg.pipeGates))
-	for i := range pg.pipeGates {
-		pg.pipeGates[i].Update(dt)
-		if !pg.pipeGates[i].Passed {
-			activePipes = append(activePipes, pg.pipeGates[i])
-		}
-	}
-	pg.pipeGates = activePipes
-
 	// Generate new pipes if needed
-	if len(pg.pipeGates) == 0 {
-		pg.addPipe(PipeGateGenerator_XStart)
+	if pgg.lastPipeGate == nil {
+		pgg.addPipe(PipeGateGenerator_XStart)
 	}
-	nextXStart := pg.getNextXStart()
+	nextXStart := pgg.getNextXStart()
 	for nextXStart < float32(raylib.GetScreenWidth()+PipeGateGenerator_PreloadZoneWidth) {
-		pg.addPipe(nextXStart)
-		nextXStart = pg.getNextXStart()
+		pgg.addPipe(nextXStart)
+		nextXStart = pgg.getNextXStart()
 	}
 
 }
 
-func (pg *PipeGateGenerator) getNextXStart() float32 {
-	lastPipeX := pg.pipeGates[len(pg.pipeGates)-1].x
+func (pgg *PipeGateGenerator) getNextXStart() float32 {
+	if pgg.lastPipeGate == nil {
+		return PipeGateGenerator_XStart
+	}
+	lastPipeX := pgg.lastPipeGate.GetX()
 	return lastPipeX +
 		PipeGateGenerator_HSpacing +
-		float32(pg.pipeGates[len(pg.pipeGates)-1].topSprite.Texture.Width)
-}
-
-func (pg *PipeGateGenerator) Draw() {
-	for _, pipe := range pg.pipeGates {
-		pipe.Draw()
-	}
+		float32(pgg.lastPipeGate.topSprite.Texture.Width)
 }
