@@ -18,6 +18,7 @@ const (
 
 type PipeGate struct {
 	*core.BaseEntity
+	*core.BasePausable
 	*core.BaseDrawable
 	topSprite    core.Sprite
 	bottomSprite core.Sprite
@@ -36,6 +37,7 @@ func NewPipeGate(parent *core.Scene, x, speed float32) *PipeGate {
 
 	return &PipeGate{
 		BaseEntity:   core.NewBaseEntity(parent, "pipe_gate"),
+		BasePausable: core.NewBasePausable(),
 		BaseDrawable: core.NewBaseDrawable(PipeGate_ZIndex),
 		topSprite:    *topSprite,
 		bottomSprite: *bottomSprite,
@@ -116,6 +118,11 @@ func (pg *PipeGate) OnAdd() {
 		0, // density > 0 to allow velocity
 	)
 	pg.bottomBody.UseGravity = false
+
+	if pg.IsPaused() {
+		pg.topBody.Enabled = false
+		pg.bottomBody.Enabled = false
+	}
 }
 
 // OnRemove destroys the physics bodies for the pipes
@@ -128,5 +135,25 @@ func (pg *PipeGate) OnRemove() {
 	if pg.bottomBody != nil {
 		pg.bottomBody.Destroy()
 		pg.bottomBody = nil
+	}
+}
+
+func (pg *PipeGate) Pause() {
+	pg.BasePausable.Pause()
+	if pg.topBody != nil {
+		pg.topBody.Enabled = false
+	}
+	if pg.bottomBody != nil {
+		pg.bottomBody.Enabled = false
+	}
+}
+
+func (pg *PipeGate) Resume() {
+	pg.BasePausable.Resume()
+	if pg.topBody != nil {
+		pg.topBody.Enabled = true
+	}
+	if pg.bottomBody != nil {
+		pg.bottomBody.Enabled = true
 	}
 }

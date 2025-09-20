@@ -15,17 +15,18 @@ const (
 
 type Ground struct {
 	*core.BaseEntity
+	*core.BasePausable
 	*core.BaseDrawable
-	sprite  core.Sprite
-	speed   float32
-	offset  float32
-	Running bool
-	body    *physics.Body
+	sprite core.Sprite
+	speed  float32
+	offset float32
+	body   *physics.Body
 }
 
 func NewGround(parent *core.Scene, speed float32) *Ground {
 	return &Ground{
 		BaseEntity:   core.NewBaseEntity(parent, "ground"),
+		BasePausable: core.NewBasePausable(),
 		BaseDrawable: core.NewBaseDrawable(Ground_ZIndex),
 		sprite:       *core.NewSprite(assets.GroundImage, core.PivotUpLeft),
 		speed:        speed,
@@ -33,7 +34,7 @@ func NewGround(parent *core.Scene, speed float32) *Ground {
 }
 
 func (g *Ground) Update(dt float32) {
-	if !g.Running {
+	if g.IsPaused() {
 		return
 	}
 	// Move the ground to the left

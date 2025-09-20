@@ -1,7 +1,6 @@
 package entities
 
 import (
-	"log"
 	"simple-go-game/internal/assets"
 	"simple-go-game/internal/core"
 
@@ -25,8 +24,8 @@ const (
 // It embeds BaseEntity and BaseDrawable to inherit core functionality.
 type Player struct {
 	*core.BaseEntity
+	*core.BasePausable
 	*core.BaseDrawable
-
 	// Player-specific properties
 	transform      core.Transform
 	speed          float32
@@ -45,6 +44,7 @@ func NewPlayer(parent *core.Scene, color string, score *ScoreDisplay) *Player {
 	animatedSprite.SetAnimation(color)
 	return &Player{
 		BaseEntity:     core.NewBaseEntity(parent, "player"),
+		BasePausable:   core.NewBasePausable(),
 		BaseDrawable:   core.NewBaseDrawable(Player_ZIndex),
 		transform:      *core.NewTransform(Player_StartPositionX, Player_StartPositionY),
 		speed:          100.0, // pixels per second
@@ -55,6 +55,10 @@ func NewPlayer(parent *core.Scene, color string, score *ScoreDisplay) *Player {
 
 // Update handles player input and movement.
 func (p *Player) Update(dt float32) {
+	if p.IsPaused() {
+		return
+	}
+
 	p.animatedSprite.Update(dt)
 
 	// Input: jump (impulso directo en velocidad vertical)
@@ -117,6 +121,9 @@ func (p *Player) OnAdd() {
 
 	// Configurar callback de colisión para logging
 	p.body.OnCollision = p.OnCollision
+	if p.IsPaused() {
+		p.body.Enabled = false
+	}
 }
 
 func (p *Player) OnRemove() {
@@ -124,10 +131,38 @@ func (p *Player) OnRemove() {
 }
 
 func (p *Player) OnCollision(other *physics.Body) {
-	log.Printf("Player OnCollision with: %v", other.Tag)
+	if p.IsPaused() {
+		return
+	}
 	gates := p.GetParent().GetEntitiesByGroup("pipe_gate")
 	ground := p.GetParent().GetEntitiesByGroup("ground")
-	log.Println("Current pipe gates in scene:", len(gates))
-	log.Println("Current ground entities in scene:", len(ground))
+
+	// Pause all gates
+	for _, gate := range gates {
+		if pausable, ok := gate.(core.Pausable); ok {
+			pausable.Pause()
+		}
+	}
+
+	// Pause the ground entity (only one expected)
+	if len(ground) > 0 {
+		if pausable, ok := ground[0].(core.Pausable); ok {
+			pausable.Pause()
+		}
+	}
 	p.score.Increment()
+}
+
+func (p *Player) Pause() {
+	p.BasePausable.Pause()
+	if p.body != nil {
+		p.body.Enabled = false
+	}
+}
+
+func (p *Player) Resume() {
+	p.BasePausable.Resume()
+	if p.body != nil {
+		p.body.Enabled = true
+	}
 }

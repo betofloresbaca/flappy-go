@@ -23,7 +23,6 @@ func GameBoard() *core.Scene {
 	scene.Add(background)
 	// Add the ground to the scene
 	ground := entities.NewGround(scene, speed)
-	ground.Running = true
 	scene.Add(ground)
 	// Add a pipe generator to the scene
 	pipeGenerator := entities.NewPipeGateGenerator(scene, speed)
