@@ -9,7 +9,7 @@ import (
 // Game represents the main game instance.
 // It manages the game window, scene, and main game loop.
 type Game struct {
-	scene  *Scene
+	root   Entity
 	width  int32
 	height int32
 	title  string
@@ -19,7 +19,7 @@ type Game struct {
 // NewGame creates a new game instance with the specified parameters.
 func NewGame(width, height int32, title string, fps int32) *Game {
 	return &Game{
-		scene:  nil,
+		root:   nil,
 		width:  width,
 		height: height,
 		title:  title,
@@ -27,18 +27,20 @@ func NewGame(width, height int32, title string, fps int32) *Game {
 	}
 }
 
-// Scene returns the current scene.
-func (g *Game) Scene() *Scene {
-	return g.scene
+// Root returns the current scene.
+func (g *Game) Root() Entity {
+	return g.root
 }
 
-// SetScene assigns a scene to the game instance.
-func (g *Game) SetScene(s *Scene) {
-	if g.scene != nil {
-		g.scene.OnRemove()
+// SetRoot assigns a scene to the game instance.
+func (g *Game) SetRoot(e Entity) {
+	if g.root != nil {
+		g.root.removed()
 	}
-	g.scene = s
-	g.scene.OnAdd()
+	g.root = e
+	if g.root != nil {
+		g.root.added()
+	}
 }
 
 // Initialize sets up the game window and initializes raylib.
@@ -52,9 +54,7 @@ func (g *Game) Initialize() {
 // Cleanup properly closes the game window and cleans up resources.
 // This should be called when the game is shutting down.
 func (g *Game) Cleanup() {
-	if g.scene != nil {
-		g.scene.OnRemove()
-	}
+	g.SetRoot(nil)
 	raylib.CloseAudioDevice()
 	raylib.CloseWindow()
 }
@@ -64,14 +64,18 @@ func (g *Game) Cleanup() {
 func (g *Game) Run() {
 	for !raylib.WindowShouldClose() {
 		deltaTime := raylib.GetFrameTime()
-		if g.scene != nil {
+		if g.root != nil {
 			// Update
-			g.scene.Update(deltaTime)
+			if updater, ok := g.root.(Updater); ok {
+				updater.Update(deltaTime)
+			}
 
 			// Render
 			raylib.BeginDrawing()
 			raylib.ClearBackground(raylib.RayWhite)
-			g.scene.Draw()
+			if drawer, ok := g.root.(Drawer); ok {
+				drawer.Draw()
+			}
 			raylib.EndDrawing()
 		}
 	}

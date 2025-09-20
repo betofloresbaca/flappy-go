@@ -13,29 +13,31 @@ type Updater interface {
 }
 
 type BaseUpdater struct {
-	paused bool
+	paused   bool
+	OnPause  func()
+	OnResume func()
 }
 
 func NewBaseUpdater() *BaseUpdater {
 	return &BaseUpdater{paused: false}
 }
 
-func (bu *BaseUpdater) Update(dt float32) {}
+func (bu BaseUpdater) Update(dt float32) {}
 
-func (bu *BaseUpdater) Paused() bool {
+func (bu BaseUpdater) Paused() bool {
 	return bu.paused
 }
 
 func (bu *BaseUpdater) Pause() {
 	bu.paused = true
-	bu.OnPause()
+	if bu.OnPause != nil {
+		bu.OnPause()
+	}
 }
 
 func (bu *BaseUpdater) Resume() {
 	bu.paused = false
-	bu.OnResume()
+	if bu.OnResume != nil {
+		bu.OnResume()
+	}
 }
-
-func (bu *BaseUpdater) OnPause() {}
-
-func (bu *BaseUpdater) OnResume() {}

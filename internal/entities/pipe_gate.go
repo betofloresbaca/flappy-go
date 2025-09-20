@@ -20,14 +20,14 @@ type PipeGate struct {
 	*core.BaseEntity
 	*core.BaseUpdater
 	*core.BaseDrawer
-	topSprite    core.Sprite
-	bottomSprite core.Sprite
-	gapY         float32
-	speed        float32
-	Running      bool
+	topSprite    *core.Sprite
+	bottomSprite *core.Sprite
 	topBody      *physics.Body
 	bottomBody   *physics.Body
 	scoreBody    *physics.Body
+	gapY         float32
+	speed        float32
+	Running      bool
 	initialX     float32 // Only used for initialization
 }
 
@@ -36,16 +36,21 @@ func NewPipeGate(parent *core.Scene, x, speed float32) *PipeGate {
 	topSprite.FlipV = true
 	bottomSprite := core.NewSprite(assets.PipeSprites["green"], core.PivotCenter)
 
-	return &PipeGate{
+	pg := &PipeGate{
 		BaseEntity:   core.NewBaseEntity(parent, "pipe_gate"),
 		BaseUpdater:  core.NewBaseUpdater(),
 		BaseDrawer:   core.NewBaseDrawer(PipeGate_ZIndex),
-		topSprite:    *topSprite,
-		bottomSprite: *bottomSprite,
+		topSprite:    topSprite,
+		bottomSprite: bottomSprite,
 		gapY:         float32(raylib.GetRandomValue(PipeGate_GapYMin, PipeGate_GapYMax)),
 		speed:        speed,
 		initialX:     x,
 	}
+	pg.BaseEntity.OnAdd = pg.onAdd
+	pg.BaseEntity.OnRemove = pg.onRemove
+	pg.BaseUpdater.OnPause = pg.onPause
+	pg.BaseUpdater.OnResume = pg.onResume
+	return pg
 }
 
 func (pg *PipeGate) Update(dt float32) {
@@ -95,8 +100,8 @@ func (pg *PipeGate) GetX() float32 {
 	return pg.initialX
 }
 
-// OnAdd creates the static physics bodies for the pipes
-func (pg *PipeGate) OnAdd() {
+// onAdd creates the static physics bodies for the pipes
+func (pg *PipeGate) onAdd() {
 	pipeWidth := float32(pg.topSprite.Texture.Width)
 	pipeHeight := float32(pg.topSprite.Texture.Height)
 
@@ -104,7 +109,7 @@ func (pg *PipeGate) OnAdd() {
 	topCenterX := pg.initialX + pipeWidth/2
 	topCenterY := (pg.gapY - float32(PipeGate_GapHeight/2)) - pipeHeight/2
 	pg.topBody = physics.NewBodyRectangle(
-		"pipe_gate",
+		pg.Group(),
 		raylib.Vector2{X: topCenterX, Y: topCenterY},
 		pipeWidth,
 		pipeHeight,
@@ -128,7 +133,7 @@ func (pg *PipeGate) OnAdd() {
 	bottomCenterX := pg.initialX + pipeWidth/2
 	bottomCenterY := (pg.gapY + float32(PipeGate_GapHeight/2)) + pipeHeight/2
 	pg.bottomBody = physics.NewBodyRectangle(
-		"pipe_gate",
+		pg.Group(),
 		raylib.Vector2{X: bottomCenterX, Y: bottomCenterY},
 		pipeWidth,
 		pipeHeight,
@@ -143,8 +148,8 @@ func (pg *PipeGate) OnAdd() {
 	}
 }
 
-// OnRemove destroys the physics bodies for the pipes
-func (pg *PipeGate) OnRemove() {
+// onRemove destroys the physics bodies for the pipes
+func (pg *PipeGate) onRemove() {
 	pg.Running = false
 	if pg.topBody != nil {
 		pg.topBody.Destroy()
@@ -156,7 +161,7 @@ func (pg *PipeGate) OnRemove() {
 	}
 }
 
-func (pg *PipeGate) OnPause() {
+func (pg *PipeGate) onPause() {
 	if pg.topBody != nil {
 		pg.topBody.Enabled = false
 	}
@@ -168,7 +173,7 @@ func (pg *PipeGate) OnPause() {
 	}
 }
 
-func (pg *PipeGate) OnResume() {
+func (pg *PipeGate) onResume() {
 	if pg.topBody != nil {
 		pg.topBody.Enabled = true
 	}

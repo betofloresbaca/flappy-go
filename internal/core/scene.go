@@ -25,7 +25,7 @@ type Scene struct {
 
 // NewScene creates a new empty scene.
 func NewScene(parent *Scene, group string, zIndex int) *Scene {
-	return &Scene{
+	s := &Scene{
 		BaseEntity:    NewBaseEntity(parent, group),
 		BaseUpdater:   NewBaseUpdater(),
 		BaseDrawer:    NewBaseDrawer(zIndex),
@@ -34,18 +34,26 @@ func NewScene(parent *Scene, group string, zIndex int) *Scene {
 		handlePhysics: false,
 		inTree:        false,
 	}
+	s.BaseEntity.OnAdd = s.onAdd
+	s.BaseEntity.OnRemove = s.onRemove
+	return s
 }
 
 // NewPhysicsScene creates a new empty physics scene.
 func NewPhysicsScene(parent *Scene, group string, zIndex int, gravity raylib.Vector2) *Scene {
-	return &Scene{
+	s := &Scene{
 		BaseEntity:    NewBaseEntity(parent, group),
+		BaseUpdater:   NewBaseUpdater(),
+		BaseDrawer:    NewBaseDrawer(zIndex),
 		entities:      make([]Entity, 0),
 		entityIndices: make(map[uint64]int),
 		handlePhysics: true,
 		gravity:       gravity,
 		inTree:        false,
 	}
+	s.BaseEntity.OnAdd = s.onPhysicsAdd
+	s.BaseEntity.OnRemove = s.onPhysicsRemove
+	return s
 }
 
 // Add adds an entity to the scene. If the entity is already in the scene, this is a no-op.
@@ -58,7 +66,7 @@ func (s *Scene) Add(e Entity) {
 	s.entities = append(s.entities, e)
 	s.entityIndices[e.Id()] = len(s.entities) - 1
 	if s.inTree {
-		e.OnAdd()
+		e.added()
 	}
 }
 
@@ -77,7 +85,7 @@ func (s *Scene) Remove(e Entity) {
 	s.entityIndices[lastEntity.Id()] = idxToRemove
 	s.entities = s.entities[:lastIndex]
 	delete(s.entityIndices, idToRemove)
-	e.OnRemove()
+	e.removed()
 }
 
 // GetEntityById returns the entity with the given ID, or nil if not found.
@@ -132,23 +140,31 @@ func (s *Scene) Draw() {
 	}
 }
 
-func (s *Scene) OnAdd() {
+func (s *Scene) onPhysicsAdd() {
 	if s.handlePhysics {
 		physics.Init()
 		physics.SetGravity(s.gravity.X, s.gravity.Y)
 	}
-	s.inTree = true
-	for _, e := range s.entities {
-		e.OnAdd()
+	s.onAdd()
+}
+
+func (s *Scene) onPhysicsRemove() {
+	s.onRemove()
+	if s.handlePhysics {
+		physics.Close()
 	}
 }
 
-func (s *Scene) OnRemove() {
+func (s *Scene) onAdd() {
+	s.inTree = true
 	for _, e := range s.entities {
-		e.OnRemove()
+		e.added()
 	}
-	if s.handlePhysics {
-		physics.Close()
+}
+
+func (s *Scene) onRemove() {
+	for _, e := range s.entities {
+		e.removed()
 	}
 	s.entities = nil
 	s.entityIndices = nil

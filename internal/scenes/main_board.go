@@ -16,7 +16,7 @@ func GameBoard() *core.Scene {
 	scoreDisplay := entities.NewScoreDisplay(scene)
 	scene.Add(scoreDisplay)
 	// Add the player to the scene
-	player := entities.NewPlayer(scene, "red", scoreDisplay)
+	player := entities.NewPlayer(scene, "red")
 	scene.Add(player)
 	// Add the background to the scene
 	background := entities.NewBackground(scene, "night")

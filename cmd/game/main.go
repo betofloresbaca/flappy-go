@@ -14,7 +14,7 @@ func main() {
 	g.Initialize()
 	defer g.Cleanup()
 	// Create and set the main scene
-	g.SetScene(scenes.GameBoard())
+	g.SetRoot(scenes.GameBoard())
 	// Start the main game loop
 	g.Run()
 }

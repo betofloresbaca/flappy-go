@@ -11,16 +11,16 @@ import (
 type Entity interface {
 	// Id returns the unique identifier for this entity.
 	Id() uint64
-	// OnAdd is called when the entity is added to the tree.
-	OnAdd()
-	// OnRemove is called when the entity is removed from the tree.
-	OnRemove()
 	// Get group of the entity
 	Group() string
 	// Set group of the entity
 	SetGroup(group string)
 	// Parent scene
 	Parent() *Scene
+	// Call when entity is added to the scene
+	added()
+	// Call when entity is removed from the scene
+	removed()
 }
 
 var nextId uint64
@@ -28,9 +28,11 @@ var nextId uint64
 // BaseEntity provides a basic implementation of the Entity interface.
 // It handles ID generation and provides default empty implementations of lifecycle methods.
 type BaseEntity struct {
-	id     uint64
-	group  string
-	parent *Scene
+	id       uint64
+	group    string
+	parent   *Scene
+	OnAdd    func()
+	OnRemove func()
 }
 
 // NewBaseEntity creates a new BaseEntity with a unique ID.
@@ -46,12 +48,6 @@ func NewBaseEntity(parent *Scene, group string) *BaseEntity {
 func (e BaseEntity) Id() uint64 {
 	return e.id
 }
-
-// OnAdd provides a default empty implementation of the OnAdd lifecycle method.
-func (e BaseEntity) OnAdd() {}
-
-// OnRemove provides a default empty implementation of the OnRemove lifecycle method.
-func (e BaseEntity) OnRemove() {}
 
 // Update provides a default empty implementation of the Update method.
 func (e BaseEntity) Update(deltaTime float32) {}
@@ -69,4 +65,16 @@ func (e *BaseEntity) SetGroup(group string) {
 // Parent returns the parent scene of the entity. Default is nil.
 func (e BaseEntity) Parent() *Scene {
 	return e.parent
+}
+
+func (e BaseEntity) added() {
+	if e.OnAdd != nil {
+		e.OnAdd()
+	}
+}
+
+func (e BaseEntity) removed() {
+	if e.OnRemove != nil {
+		e.OnRemove()
+	}
 }

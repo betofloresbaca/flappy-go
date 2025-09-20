@@ -28,31 +28,34 @@ type Player struct {
 	*core.BaseEntity
 	*core.BaseUpdater
 	*core.BaseDrawer
-	// Player-specific properties
-	transform      core.Transform
-	animatedSprite core.AnimatedSprite
+	animatedSprite *core.AnimatedSprite
 	body           *physics.Body
-	score          *ScoreDisplay
+	scoreDisplay   *ScoreDisplay
+	transform      core.Transform
 	isDead         bool
 }
 
 // NewPlayer creates a new player entity at the specified position.
-func NewPlayer(parent *core.Scene, color string, score *ScoreDisplay) *Player {
+func NewPlayer(parent *core.Scene, color string) *Player {
 	animatedSprite := core.NewAnimatedSprite()
 	for _, birdColor := range []string{"blue", "red", "yellow"} {
 		frames := assets.BirdImages[birdColor]
 		animatedSprite.AddAnimation(birdColor, frames, Player_AnimationFrameTime, true)
 	}
 	animatedSprite.SetAnimation(color)
-	return &Player{
+	p := &Player{
 		BaseEntity:     core.NewBaseEntity(parent, "player"),
 		BaseUpdater:    core.NewBaseUpdater(),
 		BaseDrawer:     core.NewBaseDrawer(Player_ZIndex),
+		animatedSprite: animatedSprite,
 		transform:      *core.NewTransform(Player_StartPositionX, Player_StartPositionY),
-		animatedSprite: *animatedSprite,
-		score:          score,
 		isDead:         false,
 	}
+	p.BaseUpdater.OnPause = p.onPause
+	p.BaseUpdater.OnResume = p.onResume
+	p.BaseEntity.OnAdd = p.onAdd
+	p.BaseEntity.OnRemove = p.onRemove
+	return p
 }
 
 // Update handles player input and movement.
@@ -72,7 +75,7 @@ func (p *Player) Update(dt float32) {
 		}
 	}
 
-	// Clamp de velocidad vertical para controlar la sensación arcade
+	// Clamp vertical velocity to control arcade feel
 	if p.body != nil {
 		if p.body.Velocity.Y > Player_MaxVelocityY {
 			p.body.Velocity.Y = Player_MaxVelocityY
@@ -81,13 +84,13 @@ func (p *Player) Update(dt float32) {
 		}
 	}
 
-	// Sincroniza transform únicamente desde el cuerpo físico
+	// Synchronize transform only from the physics body
 	if p.body != nil {
 		p.transform.Position = p.body.Position
 		p.transform.Rotation = (p.body.Velocity.Y / Player_MaxVelocityY) * Player_MaxRotation
 	}
 
-	// Limita dentro de los bounds verticales de la pantalla ajustando el body
+	// Limit within the vertical bounds of the screen by adjusting the body
 	screenHeight := float32(raylib.GetScreenHeight())
 	if p.body != nil {
 		if p.body.Position.Y < 0 {
@@ -110,9 +113,9 @@ func (p *Player) Draw() {
 	p.animatedSprite.Draw(p.transform)
 }
 
-// Override onadd y on remove
-func (p *Player) OnAdd() {
-	// Densidad reducida para hacer más sensibles los impulsos
+// Override onAdd and OnRemove
+func (p *Player) onAdd() {
+	// Reduced density to make impulses more sensitive
 	p.body = physics.NewBodyRectangle(
 		"Player",
 		p.transform.Position,
@@ -121,18 +124,30 @@ func (p *Player) OnAdd() {
 		1,
 	)
 
-	// Configurar callback de colisión para logging
-	p.body.OnCollision = p.OnCollision
+	// Set collision callback for logging
+	p.body.OnCollision = p.onCollision
 	if p.Paused() {
 		p.body.Enabled = false
 	}
 }
 
-func (p *Player) OnRemove() {
+func (p *Player) onRemove() {
 	p.body.Destroy()
 }
 
-func (p *Player) OnCollision(other *physics.Body, manifold *physics.Manifold) {
+func (p *Player) onPause() {
+	if p.body != nil {
+		p.body.Enabled = false
+	}
+}
+
+func (p *Player) onResume() {
+	if p.body != nil {
+		p.body.Enabled = true
+	}
+}
+
+func (p *Player) onCollision(other *physics.Body, manifold *physics.Manifold) {
 	if p.Paused() || p.isDead {
 		return
 	}
@@ -140,41 +155,42 @@ func (p *Player) OnCollision(other *physics.Body, manifold *physics.Manifold) {
 	switch other.Tag {
 	case "pipe_gate_score":
 		other.Destroy() // Disable score trigger after scoring
-		p.score.Increment()
+		p.searchScoreDisplay().Increment()
 	case "ground", "pipe_gate":
-		p.Die()
+		p.die()
 	}
-
 }
 
-func (p *Player) Die() {
-	gates := p.Parent().GetEntitiesByGroup("pipe_gate")
-	ground := p.Parent().GetEntitiesByGroup("ground")
+func (p *Player) searchScoreDisplay() *ScoreDisplay {
+	if p.scoreDisplay == nil {
+		entities := p.Parent().GetEntitiesByGroup("score_display")
+		if len(entities) > 0 {
+			if score, ok := entities[0].(*ScoreDisplay); ok {
+				p.scoreDisplay = score
+			}
+		}
+		if p.scoreDisplay == nil {
+			log.Println("Warning: Player could not find ScoreDisplay entity in scene")
+		}
+	}
+	return p.scoreDisplay
+}
 
+func (p *Player) die() {
+	pipeGates := p.Parent().GetEntitiesByGroup("pipe_gate")
+	ground := p.Parent().GetEntitiesByGroup("ground")
 	// Pause all gates
-	for _, gate := range gates {
-		if updatable, ok := gate.(core.Updater); ok {
-			updatable.Pause()
+	for _, gate := range pipeGates {
+		if updater, ok := gate.(*PipeGate); ok {
+			updater.Pause()
 		}
 	}
 
 	// Pause the ground entity (only one expected)
 	if len(ground) > 0 {
-		if updatable, ok := ground[0].(core.Updater); ok {
-			updatable.Pause()
+		if updater, ok := ground[0].(*Ground); ok {
+			updater.Pause()
 		}
 	}
 	p.isDead = true
-}
-
-func (p *Player) OnPause() {
-	if p.body != nil {
-		p.body.Enabled = false
-	}
-}
-
-func (p *Player) OnResume() {
-	if p.body != nil {
-		p.body.Enabled = true
-	}
 }

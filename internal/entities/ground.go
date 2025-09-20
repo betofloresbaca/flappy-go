@@ -24,13 +24,16 @@ type Ground struct {
 }
 
 func NewGround(parent *core.Scene, speed float32) *Ground {
-	return &Ground{
+	g := &Ground{
 		BaseEntity:  core.NewBaseEntity(parent, "ground"),
 		BaseUpdater: core.NewBaseUpdater(),
 		BaseDrawer:  core.NewBaseDrawer(Ground_ZIndex),
 		sprite:      *core.NewSprite(assets.GroundImage, core.PivotUpLeft),
 		speed:       speed,
 	}
+	g.BaseEntity.OnAdd = g.onAdd
+	g.BaseEntity.OnRemove = g.onRemove
+	return g
 }
 
 func (g *Ground) Update(dt float32) {
@@ -49,8 +52,8 @@ func (g *Ground) Draw() {
 	}
 }
 
-// OnAdd creates the static physics body for ground collision
-func (g *Ground) OnAdd() {
+// onAdd creates the static physics body for ground collision
+func (g *Ground) onAdd() {
 	screenWidth := float32(raylib.GetScreenWidth())
 	screenHeight := float32(raylib.GetScreenHeight())
 
@@ -64,7 +67,7 @@ func (g *Ground) OnAdd() {
 
 	// Create static body (density 0 makes it static)
 	g.body = physics.NewBodyRectangle(
-		"Ground",
+		g.Group(),
 		raylib.Vector2{X: centerX, Y: centerY},
 		groundWidth,
 		groundHeight,
@@ -72,8 +75,8 @@ func (g *Ground) OnAdd() {
 	)
 }
 
-// OnRemove cleans up the physics body
-func (g *Ground) OnRemove() {
+// onRemove cleans up the physics body
+func (g *Ground) onRemove() {
 	if g.body != nil {
 		g.body.Destroy()
 	}
