@@ -14,6 +14,7 @@ const (
 
 type PipeGateGenerator struct {
 	*core.BaseEntity
+	*core.BaseUpdater
 	speed        float32
 	lastPipeGate *PipeGate
 	Running      bool
@@ -21,16 +22,10 @@ type PipeGateGenerator struct {
 
 func NewPipeGateGenerator(parent *core.Scene, speed float32) *PipeGateGenerator {
 	return &PipeGateGenerator{
-		BaseEntity: core.NewBaseEntity(parent, "pipe_gate_generator"),
-		speed:      speed,
+		BaseEntity:  core.NewBaseEntity(parent, "pipe_gate_generator"),
+		BaseUpdater: core.NewBaseUpdater(),
+		speed:       speed,
 	}
-}
-
-func (pgg *PipeGateGenerator) addPipe(x float32) {
-	newPipe := NewPipeGate(pgg.BaseEntity.GetParent(), x, pgg.speed)
-	newPipe.Running = true
-	pgg.lastPipeGate = newPipe
-	pgg.BaseEntity.GetParent().Add(newPipe)
 }
 
 func (pgg *PipeGateGenerator) Update(dt float32) {
@@ -47,6 +42,13 @@ func (pgg *PipeGateGenerator) Update(dt float32) {
 		nextXStart = pgg.getNextXStart()
 	}
 
+}
+
+func (pgg *PipeGateGenerator) addPipe(x float32) {
+	newPipe := NewPipeGate(pgg.BaseEntity.Parent(), x, pgg.speed)
+	newPipe.Running = true
+	pgg.lastPipeGate = newPipe
+	pgg.BaseEntity.Parent().Add(newPipe)
 }
 
 func (pgg *PipeGateGenerator) getNextXStart() float32 {

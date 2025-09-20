@@ -1,9 +1,9 @@
 package entities
 
 import (
-	"fmt"
 	"flappy-go/internal/assets"
 	"flappy-go/internal/core"
+	"fmt"
 
 	raylib "github.com/gen2brain/raylib-go/raylib"
 )
@@ -15,7 +15,7 @@ const (
 
 type ScoreDisplay struct {
 	*core.BaseEntity
-	*core.BaseDrawable
+	*core.BaseDrawer
 	value         int
 	numberSprites [10]core.Sprite
 	numberWidth   float32
@@ -29,7 +29,7 @@ func NewScoreDisplay(parent *core.Scene) *ScoreDisplay {
 	}
 	score := ScoreDisplay{
 		BaseEntity:    core.NewBaseEntity(parent, "score_display"),
-		BaseDrawable:  core.NewBaseDrawable(ScoreDisplay_ZIndex),
+		BaseDrawer:    core.NewBaseDrawer(ScoreDisplay_ZIndex),
 		value:         0,
 		numberSprites: sprites,
 		numberWidth:   float32(sprites[0].Texture.Width),

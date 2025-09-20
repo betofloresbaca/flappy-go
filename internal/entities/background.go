@@ -13,15 +13,15 @@ const (
 
 type Background struct {
 	*core.BaseEntity
-	*core.BaseDrawable
+	*core.BaseDrawer
 	sprite core.Sprite
 }
 
 func NewBackground(parent *core.Scene, style string) *Background {
 	return &Background{
-		BaseEntity:   core.NewBaseEntity(parent, "background"),
-		BaseDrawable: core.NewBaseDrawable(Background_ZIndex),
-		sprite:       *core.NewSprite(assets.BackgroundImages[style], Background_SpritePivot),
+		BaseEntity: core.NewBaseEntity(parent, "background"),
+		BaseDrawer: core.NewBaseDrawer(Background_ZIndex),
+		sprite:     *core.NewSprite(assets.BackgroundImages[style], Background_SpritePivot),
 	}
 }
 

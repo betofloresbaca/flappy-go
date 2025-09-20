@@ -18,8 +18,8 @@ const (
 
 type PipeGate struct {
 	*core.BaseEntity
-	*core.BasePausable
-	*core.BaseDrawable
+	*core.BaseUpdater
+	*core.BaseDrawer
 	topSprite    core.Sprite
 	bottomSprite core.Sprite
 	gapY         float32
@@ -38,8 +38,8 @@ func NewPipeGate(parent *core.Scene, x, speed float32) *PipeGate {
 
 	return &PipeGate{
 		BaseEntity:   core.NewBaseEntity(parent, "pipe_gate"),
-		BasePausable: core.NewBasePausable(),
-		BaseDrawable: core.NewBaseDrawable(PipeGate_ZIndex),
+		BaseUpdater:  core.NewBaseUpdater(),
+		BaseDrawer:   core.NewBaseDrawer(PipeGate_ZIndex),
 		topSprite:    *topSprite,
 		bottomSprite: *bottomSprite,
 		gapY:         float32(raylib.GetRandomValue(PipeGate_GapYMin, PipeGate_GapYMax)),
@@ -68,7 +68,7 @@ func (pg *PipeGate) Update(dt float32) {
 	if pg.topBody != nil {
 		currentX := pg.topBody.Position.X
 		if currentX < -float32(pg.topSprite.Texture.Width)/2 {
-			pg.GetParent().Remove(pg)
+			pg.Parent().Remove(pg)
 		}
 	}
 }
@@ -136,7 +136,7 @@ func (pg *PipeGate) OnAdd() {
 	)
 	pg.bottomBody.UseGravity = false
 
-	if pg.IsPaused() {
+	if pg.Paused() {
 		pg.topBody.Enabled = false
 		pg.bottomBody.Enabled = false
 		pg.scoreBody.Enabled = false
@@ -156,8 +156,7 @@ func (pg *PipeGate) OnRemove() {
 	}
 }
 
-func (pg *PipeGate) Pause() {
-	pg.BasePausable.Pause()
+func (pg *PipeGate) OnPause() {
 	if pg.topBody != nil {
 		pg.topBody.Enabled = false
 	}
@@ -169,8 +168,7 @@ func (pg *PipeGate) Pause() {
 	}
 }
 
-func (pg *PipeGate) Resume() {
-	pg.BasePausable.Resume()
+func (pg *PipeGate) OnResume() {
 	if pg.topBody != nil {
 		pg.topBody.Enabled = true
 	}

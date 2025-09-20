@@ -1,9 +1,9 @@
 package entities
 
 import (
-	"log"
 	"flappy-go/internal/assets"
 	"flappy-go/internal/core"
+	"log"
 
 	physics "flappy-go/internal/core/physics"
 
@@ -26,8 +26,8 @@ const (
 // It embeds BaseEntity and BaseDrawable to inherit core functionality.
 type Player struct {
 	*core.BaseEntity
-	*core.BasePausable
-	*core.BaseDrawable
+	*core.BaseUpdater
+	*core.BaseDrawer
 	// Player-specific properties
 	transform      core.Transform
 	animatedSprite core.AnimatedSprite
@@ -46,8 +46,8 @@ func NewPlayer(parent *core.Scene, color string, score *ScoreDisplay) *Player {
 	animatedSprite.SetAnimation(color)
 	return &Player{
 		BaseEntity:     core.NewBaseEntity(parent, "player"),
-		BasePausable:   core.NewBasePausable(),
-		BaseDrawable:   core.NewBaseDrawable(Player_ZIndex),
+		BaseUpdater:    core.NewBaseUpdater(),
+		BaseDrawer:     core.NewBaseDrawer(Player_ZIndex),
 		transform:      *core.NewTransform(Player_StartPositionX, Player_StartPositionY),
 		animatedSprite: *animatedSprite,
 		score:          score,
@@ -57,9 +57,6 @@ func NewPlayer(parent *core.Scene, color string, score *ScoreDisplay) *Player {
 
 // Update handles player input and movement.
 func (p *Player) Update(dt float32) {
-	if p.IsPaused() {
-		return
-	}
 	if p.isDead {
 		if p.body != nil {
 			p.body.Velocity.X = 0
@@ -126,7 +123,7 @@ func (p *Player) OnAdd() {
 
 	// Configurar callback de colisión para logging
 	p.body.OnCollision = p.OnCollision
-	if p.IsPaused() {
+	if p.Paused() {
 		p.body.Enabled = false
 	}
 }
@@ -136,7 +133,7 @@ func (p *Player) OnRemove() {
 }
 
 func (p *Player) OnCollision(other *physics.Body, manifold *physics.Manifold) {
-	if p.IsPaused() || p.isDead {
+	if p.Paused() || p.isDead {
 		return
 	}
 	log.Println("Player collided with", other.Tag)
@@ -151,34 +148,32 @@ func (p *Player) OnCollision(other *physics.Body, manifold *physics.Manifold) {
 }
 
 func (p *Player) Die() {
-	gates := p.GetParent().GetEntitiesByGroup("pipe_gate")
-	ground := p.GetParent().GetEntitiesByGroup("ground")
+	gates := p.Parent().GetEntitiesByGroup("pipe_gate")
+	ground := p.Parent().GetEntitiesByGroup("ground")
 
 	// Pause all gates
 	for _, gate := range gates {
-		if pausable, ok := gate.(core.Pausable); ok {
-			pausable.Pause()
+		if updatable, ok := gate.(core.Updater); ok {
+			updatable.Pause()
 		}
 	}
 
 	// Pause the ground entity (only one expected)
 	if len(ground) > 0 {
-		if pausable, ok := ground[0].(core.Pausable); ok {
-			pausable.Pause()
+		if updatable, ok := ground[0].(core.Updater); ok {
+			updatable.Pause()
 		}
 	}
 	p.isDead = true
 }
 
-func (p *Player) Pause() {
-	p.BasePausable.Pause()
+func (p *Player) OnPause() {
 	if p.body != nil {
 		p.body.Enabled = false
 	}
 }
 
-func (p *Player) Resume() {
-	p.BasePausable.Resume()
+func (p *Player) OnResume() {
 	if p.body != nil {
 		p.body.Enabled = true
 	}

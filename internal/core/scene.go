@@ -14,7 +14,8 @@ import (
 // It provides efficient entity lookup and maintains the entity lifecycle.
 type Scene struct {
 	*BaseEntity
-	*BaseDrawable
+	*BaseUpdater
+	*BaseDrawer
 	entities      []Entity
 	entityIndices map[uint64]int
 	handlePhysics bool
@@ -26,7 +27,8 @@ type Scene struct {
 func NewScene(parent *Scene, group string, zIndex int) *Scene {
 	return &Scene{
 		BaseEntity:    NewBaseEntity(parent, group),
-		BaseDrawable:  NewBaseDrawable(zIndex),
+		BaseUpdater:   NewBaseUpdater(),
+		BaseDrawer:    NewBaseDrawer(zIndex),
 		entities:      make([]Entity, 0),
 		entityIndices: make(map[uint64]int),
 		handlePhysics: false,
@@ -91,7 +93,7 @@ func (s *Scene) GetEntityById(id uint64) (Entity, bool) {
 func (s *Scene) GetEntitiesByGroup(group string) []Entity {
 	var result []Entity
 	for _, e := range s.entities {
-		if e.GetGroup() == group {
+		if e.Group() == group {
 			result = append(result, e)
 		}
 	}
@@ -105,16 +107,18 @@ func (s *Scene) Update(dt float32) {
 		physics.Update()
 	}
 	for _, e := range s.entities {
-		e.Update(dt)
+		if up, ok := e.(Updater); ok && !up.Paused() {
+			up.Update(dt)
+		}
 	}
 }
 
 // Draw renders all drawable entities in the scene, sorted by Z-index.
 // Entities with lower Z-index values are drawn first (behind entities with higher values).
 func (s *Scene) Draw() {
-	var drawables []Drawable
+	var drawables []Drawer
 	for _, e := range s.entities {
-		if d, ok := e.(Drawable); ok {
+		if d, ok := e.(Drawer); ok && d.Visible() {
 			drawables = append(drawables, d)
 		}
 	}
