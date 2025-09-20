@@ -19,7 +19,7 @@ type Background struct {
 
 func NewBackground(parent *core.Scene, style string) *Background {
 	return &Background{
-		BaseEntity:   core.NewBaseEntity(parent),
+		BaseEntity:   core.NewBaseEntity(parent, "background"),
 		BaseDrawable: core.NewBaseDrawable(Background_ZIndex),
 		sprite:       *core.NewSprite(assets.BackgroundImages[style], Background_SpritePivot),
 	}

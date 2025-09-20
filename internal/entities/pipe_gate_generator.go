@@ -21,7 +21,7 @@ type PipeGateGenerator struct {
 
 func NewPipeGateGenerator(parent *core.Scene, speed float32) *PipeGateGenerator {
 	return &PipeGateGenerator{
-		BaseEntity: core.NewBaseEntity(parent),
+		BaseEntity: core.NewBaseEntity(parent, "pipe_gate_generator"),
 		speed:      speed,
 	}
 }

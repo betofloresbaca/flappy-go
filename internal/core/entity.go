@@ -13,4 +13,8 @@ type Entity interface {
 	OnRemove()
 	// Update is called every frame with the delta time in seconds.
 	Update(dt float32)
+	// Get group of the entity
+	GetGroup() string
+	// Set group of the entity
+	SetGroup(group string)
 }

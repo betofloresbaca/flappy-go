@@ -44,7 +44,7 @@ func NewPlayer(parent *core.Scene, color string, score *ScoreDisplay) *Player {
 	}
 	animatedSprite.SetAnimation(color)
 	return &Player{
-		BaseEntity:     core.NewBaseEntity(parent),
+		BaseEntity:     core.NewBaseEntity(parent, "player"),
 		BaseDrawable:   core.NewBaseDrawable(Player_ZIndex),
 		transform:      *core.NewTransform(Player_StartPositionX, Player_StartPositionY),
 		speed:          100.0, // pixels per second
@@ -58,7 +58,8 @@ func (p *Player) Update(dt float32) {
 	p.animatedSprite.Update(dt)
 
 	// Input: jump (impulso directo en velocidad vertical)
-	if raylib.IsKeyPressed(raylib.KeySpace) || raylib.IsMouseButtonPressed(raylib.MouseLeftButton) {
+	if raylib.IsKeyPressed(raylib.KeySpace) ||
+		raylib.IsMouseButtonPressed(raylib.MouseLeftButton) {
 		if p.body != nil {
 			p.body.Velocity.Y = -Player_JumpForce
 		}
@@ -106,14 +107,27 @@ func (p *Player) Draw() {
 // Override onadd y on remove
 func (p *Player) OnAdd() {
 	// Densidad reducida para hacer más sensibles los impulsos
-	p.body = physics.NewBodyRectangle("Player", p.transform.Position, Player_Size, Player_Size, 1)
+	p.body = physics.NewBodyRectangle(
+		"Player",
+		p.transform.Position,
+		Player_Size,
+		Player_Size,
+		1,
+	)
 
 	// Configurar callback de colisión para logging
-	p.body.OnCollision = func(other *physics.Body) {
-		log.Printf("Player collision detected with: %v", other.Tag)
-	}
+	p.body.OnCollision = p.OnCollision
 }
 
 func (p *Player) OnRemove() {
 	p.body.Destroy()
+}
+
+func (p *Player) OnCollision(other *physics.Body) {
+	log.Printf("Player OnCollision with: %v", other.Tag)
+	gates := p.Parent.GetEntitiesByGroup("pipe_gate")
+	ground := p.Parent.GetEntitiesByGroup("ground")
+	log.Println("Current pipe gates in scene:", len(gates))
+	log.Println("Current ground entities in scene:", len(ground))
+	p.score.Increment()
 }

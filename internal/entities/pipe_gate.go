@@ -35,7 +35,7 @@ func NewPipeGate(parent *core.Scene, x, speed float32) *PipeGate {
 	bottomSprite := core.NewSprite(assets.PipeSprites["green"], core.PivotCenter)
 
 	return &PipeGate{
-		BaseEntity:   core.NewBaseEntity(parent),
+		BaseEntity:   core.NewBaseEntity(parent, "pipe_gate"),
 		BaseDrawable: core.NewBaseDrawable(PipeGate_ZIndex),
 		topSprite:    *topSprite,
 		bottomSprite: *bottomSprite,

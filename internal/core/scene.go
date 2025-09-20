@@ -23,9 +23,9 @@ type Scene struct {
 }
 
 // NewScene creates a new empty scene.
-func NewScene(parent *Scene, zIndex int) *Scene {
+func NewScene(parent *Scene, group string, zIndex int) *Scene {
 	return &Scene{
-		BaseEntity:    NewBaseEntity(parent),
+		BaseEntity:    NewBaseEntity(parent, group),
 		BaseDrawable:  NewBaseDrawable(zIndex),
 		entities:      make([]Entity, 0),
 		entityIndices: make(map[uint64]int),
@@ -35,9 +35,9 @@ func NewScene(parent *Scene, zIndex int) *Scene {
 }
 
 // NewPhysicsScene creates a new empty physics scene.
-func NewPhysicsScene(parent *Scene, zIndex int, gravity raylib.Vector2) *Scene {
+func NewPhysicsScene(parent *Scene, group string, zIndex int, gravity raylib.Vector2) *Scene {
 	return &Scene{
-		BaseEntity:    NewBaseEntity(parent),
+		BaseEntity:    NewBaseEntity(parent, group),
 		entities:      make([]Entity, 0),
 		entityIndices: make(map[uint64]int),
 		handlePhysics: true,
@@ -78,14 +78,24 @@ func (s *Scene) Remove(e Entity) {
 	e.OnRemove()
 }
 
-// EntityById returns the entity with the given ID, or nil if not found.
+// GetEntityById returns the entity with the given ID, or nil if not found.
 // The second return value indicates whether the entity was found.
-func (s *Scene) EntityById(id uint64) (Entity, bool) {
+func (s *Scene) GetEntityById(id uint64) (Entity, bool) {
 	idx, exists := s.entityIndices[id]
 	if !exists {
 		return nil, false
 	}
 	return s.entities[idx], true
+}
+
+func (s *Scene) GetEntitiesByGroup(group string) []Entity {
+	var result []Entity
+	for _, e := range s.entities {
+		if e.GetGroup() == group {
+			result = append(result, e)
+		}
+	}
+	return result
 }
 
 // Update calls the Update method on all entities in the scene.
