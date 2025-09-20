@@ -88,6 +88,8 @@ type Body struct {
 	Shape Shape
 	// Tag identifier for specific body identification
 	Tag string
+	// If true, this body acts as a trigger (detects collisions but doesn't resolve them physically)
+	IsTrigger bool
 	// Collision callback function
 	OnCollision func(other *Body, manifold *Manifold)
 }
@@ -210,6 +212,7 @@ func NewBodyCircle(tag string, pos rl.Vector2, radius, density float32) *Body {
 		IsGrounded:      false,
 		FreezeOrient:    false,
 		Tag:             tag,
+		IsTrigger:       false,
 	}
 
 	newBody.Shape.Body = newBody
@@ -254,6 +257,7 @@ func NewBodyRectangle(tag string, pos rl.Vector2, width, height, density float32
 		IsGrounded:      false,
 		FreezeOrient:    false,
 		Tag:             tag,
+		IsTrigger:       false,
 	}
 
 	// Calculate centroid and moment of inertia
@@ -332,6 +336,7 @@ func NewBodyPolygon(tag string, pos rl.Vector2, radius float32, sides int, densi
 		IsGrounded:      false,
 		FreezeOrient:    false,
 		Tag:             tag,
+		IsTrigger:       false,
 	}
 
 	newBody.Shape.Body = newBody
@@ -380,6 +385,45 @@ func NewBodyPolygon(tag string, pos rl.Vector2, radius float32, sides int, densi
 	bodies[bodiesCount] = newBody
 	bodiesCount++
 	return newBody
+}
+
+// NewTriggerCircle - Creates a new circle trigger body that only detects collisions
+func NewTriggerCircle(tag string, pos rl.Vector2, radius float32) *Body {
+	body := NewBodyCircle(tag, pos, radius, 1.0) // Density doesn't matter for triggers
+	if body != nil {
+		body.IsTrigger = true
+		body.UseGravity = false
+		body.Mass = 0
+		body.InverseMass = 0
+		body.Inertia = 0
+		body.InverseInertia = 0
+	}
+	return body
+}
+
+// NewTriggerRectangle - Creates a new rectangle trigger body that only detects collisions
+func NewTriggerRectangle(tag string, pos rl.Vector2, width, height float32) *Body {
+	body := NewBodyRectangle(tag, pos, width, height, 1.0) // Density doesn't matter for triggers
+	if body != nil {
+		body.IsTrigger = true
+		body.UseGravity = false
+		body.Mass = 0
+		body.InverseMass = 0
+		body.Inertia = 0
+		body.InverseInertia = 0
+	}
+	return body
+}
+
+// SetAsTrigger - Converts an existing body into a trigger
+func (b *Body) SetAsTrigger() {
+	b.IsTrigger = true
+	b.UseGravity = false
+	b.Mass = 0
+	b.InverseMass = 0
+	b.Inertia = 0
+	b.InverseInertia = 0
+
 }
 
 // Reset - Destroys created physics bodies and manifolds
@@ -738,16 +782,20 @@ func step() {
 			solveManifold(manifold)
 
 			if manifold.ContactsCount > 0 {
-				// Create a new manifold with same information as previously solved manifold and add it to the manifolds pool last slot
-				newManifold := createManifold(bodyA, bodyB)
-				newManifold.Penetration = manifold.Penetration
-				newManifold.Normal = manifold.Normal
-				newManifold.Contacts[0] = manifold.Contacts[0]
-				newManifold.Contacts[1] = manifold.Contacts[1]
-				newManifold.ContactsCount = manifold.ContactsCount
-				newManifold.Restitution = manifold.Restitution
-				newManifold.DynamicFriction = manifold.DynamicFriction
-				newManifold.StaticFriction = manifold.StaticFriction
+				// Only create persistent manifolds for physical collision resolution
+				// Triggers still call collision callbacks but don't participate in physics resolution
+				if !bodyA.IsTrigger && !bodyB.IsTrigger {
+					// Create a new manifold with same information as previously solved manifold and add it to the manifolds pool last slot
+					newManifold := createManifold(bodyA, bodyB)
+					newManifold.Penetration = manifold.Penetration
+					newManifold.Normal = manifold.Normal
+					newManifold.Contacts[0] = manifold.Contacts[0]
+					newManifold.Contacts[1] = manifold.Contacts[1]
+					newManifold.ContactsCount = manifold.ContactsCount
+					newManifold.Restitution = manifold.Restitution
+					newManifold.DynamicFriction = manifold.DynamicFriction
+					newManifold.StaticFriction = manifold.StaticFriction
+				}
 			}
 		}
 	}
@@ -1225,7 +1273,7 @@ func solvePolygonToPolygon(manifold *Manifold) {
 
 // integrateForces - Integrates physics forces into velocity
 func integrateForces(body *Body) {
-	if body == nil || body.InverseMass == 0 || !body.Enabled {
+	if body == nil || body.InverseMass == 0 || !body.Enabled || body.IsTrigger {
 		return
 	}
 
@@ -1283,6 +1331,11 @@ func integrateImpulses(manifold *Manifold) {
 	bodyA, bodyB := manifold.BodyA, manifold.BodyB
 
 	if bodyA == nil || bodyB == nil {
+		return
+	}
+
+	// Don't apply impulses if either body is a trigger
+	if bodyA.IsTrigger || bodyB.IsTrigger {
 		return
 	}
 
@@ -1411,6 +1464,7 @@ func integrateVelocity(body *Body) {
 	if body == nil || !body.Enabled {
 		return
 	}
+
 	// deltaTime now in seconds (normalized); velocities already accumulated in seconds
 	body.Position.X += body.Velocity.X * deltaTime
 	body.Position.Y += body.Velocity.Y * deltaTime
@@ -1421,13 +1475,21 @@ func integrateVelocity(body *Body) {
 
 	rl.Mat2Set(&body.Shape.Transform, body.Orient)
 
-	integrateForces(body)
+	// Only integrate forces for non-trigger bodies
+	if !body.IsTrigger {
+		integrateForces(body)
+	}
 }
 
 // correctPositions - Corrects physics bodies positions based on manifolds collision information
 func correctPositions(manifold *Manifold) {
 	bodyA, bodyB := manifold.BodyA, manifold.BodyB
 	if bodyA == nil || bodyB == nil {
+		return
+	}
+
+	// Don't correct positions if either body is a trigger
+	if bodyA.IsTrigger || bodyB.IsTrigger {
 		return
 	}
 
