@@ -17,4 +17,6 @@ type Entity interface {
 	GetGroup() string
 	// Set group of the entity
 	SetGroup(group string)
+	// Parent scene
+	GetParent() *Scene
 }

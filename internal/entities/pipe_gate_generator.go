@@ -27,10 +27,10 @@ func NewPipeGateGenerator(parent *core.Scene, speed float32) *PipeGateGenerator 
 }
 
 func (pgg *PipeGateGenerator) addPipe(x float32) {
-	newPipe := NewPipeGate(pgg.BaseEntity.Parent, x, pgg.speed)
+	newPipe := NewPipeGate(pgg.BaseEntity.GetParent(), x, pgg.speed)
 	newPipe.Running = true
 	pgg.lastPipeGate = newPipe
-	pgg.BaseEntity.Parent.Add(newPipe)
+	pgg.BaseEntity.GetParent().Add(newPipe)
 }
 
 func (pgg *PipeGateGenerator) Update(dt float32) {

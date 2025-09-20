@@ -125,8 +125,8 @@ func (p *Player) OnRemove() {
 
 func (p *Player) OnCollision(other *physics.Body) {
 	log.Printf("Player OnCollision with: %v", other.Tag)
-	gates := p.Parent.GetEntitiesByGroup("pipe_gate")
-	ground := p.Parent.GetEntitiesByGroup("ground")
+	gates := p.GetParent().GetEntitiesByGroup("pipe_gate")
+	ground := p.GetParent().GetEntitiesByGroup("ground")
 	log.Println("Current pipe gates in scene:", len(gates))
 	log.Println("Current ground entities in scene:", len(ground))
 	p.score.Increment()

@@ -62,7 +62,7 @@ func (pg *PipeGate) Update(dt float32) {
 	if pg.topBody != nil {
 		currentX := pg.topBody.Position.X
 		if currentX < -float32(pg.topSprite.Texture.Width)/2 {
-			pg.Parent.Remove(pg)
+			pg.GetParent().Remove(pg)
 		}
 	}
 }

@@ -11,7 +11,7 @@ var nextId uint64
 type BaseEntity struct {
 	id     uint64
 	group  string
-	Parent *Scene
+	parent *Scene
 }
 
 // NewBaseEntity creates a new BaseEntity with a unique ID.
@@ -19,7 +19,7 @@ func NewBaseEntity(parent *Scene, group string) *BaseEntity {
 	return &BaseEntity{
 		id:     atomic.AddUint64(&nextId, 1),
 		group:  group,
-		Parent: parent,
+		parent: parent,
 	}
 }
 
@@ -45,4 +45,9 @@ func (e BaseEntity) GetGroup() string {
 // SetGroup sets the group of the entity. Default does nothing.
 func (e *BaseEntity) SetGroup(group string) {
 	e.group = group
+}
+
+// GetParent returns the parent scene of the entity. Default is nil.
+func (e BaseEntity) GetParent() *Scene {
+	return e.parent
 }
