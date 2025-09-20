@@ -1,8 +1,8 @@
 package scenes
 
 import (
-	"simple-go-game/internal/core"
-	"simple-go-game/internal/entities"
+	"flappy-go/internal/core"
+	"flappy-go/internal/entities"
 
 	raylib "github.com/gen2brain/raylib-go/raylib"
 )

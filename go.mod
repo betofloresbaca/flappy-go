@@ -1,4 +1,4 @@
-module simple-go-game
+module flappy-go
 
 go 1.25.1
 

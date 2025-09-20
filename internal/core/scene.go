@@ -5,7 +5,7 @@ package core
 import (
 	"sort"
 
-	physics "simple-go-game/internal/core/physics"
+	physics "flappy-go/internal/core/physics"
 
 	raylib "github.com/gen2brain/raylib-go/raylib"
 )

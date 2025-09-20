@@ -1,8 +1,8 @@
 package entities
 
 import (
-	"simple-go-game/internal/assets"
-	"simple-go-game/internal/core"
+	"flappy-go/internal/assets"
+	"flappy-go/internal/core"
 )
 
 const (

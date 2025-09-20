@@ -2,8 +2,8 @@ package entities
 
 import (
 	"fmt"
-	"simple-go-game/internal/assets"
-	"simple-go-game/internal/core"
+	"flappy-go/internal/assets"
+	"flappy-go/internal/core"
 
 	raylib "github.com/gen2brain/raylib-go/raylib"
 )

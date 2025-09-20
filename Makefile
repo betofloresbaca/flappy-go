@@ -6,7 +6,7 @@ all: build
 
 # Build the game executable
 build:
-	go build -o simple-go-game ./cmd/game
+	go build -o flappy-go ./cmd/game
 
 # Run the game directly
 run:
@@ -14,7 +14,7 @@ run:
 
 # Clean build artifacts
 clean:
-	rm -f simple-go-game
+	rm -f flappy-go
 
 # Run tests
 test:

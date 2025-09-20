@@ -1,7 +1,7 @@
 package entities
 
 import (
-	"simple-go-game/internal/core"
+	"flappy-go/internal/core"
 
 	raylib "github.com/gen2brain/raylib-go/raylib"
 )

@@ -1,11 +1,11 @@
-// Main entry point for the simple-go-game.
+// Main entry point for the flappy-go.
 // This file initializes and starts the game.
 package main
 
 import (
 	_ "embed"
-	"simple-go-game/internal/core"
-	"simple-go-game/internal/scenes"
+	"flappy-go/internal/core"
+	"flappy-go/internal/scenes"
 )
 
 func main() {

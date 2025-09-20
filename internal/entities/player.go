@@ -2,10 +2,10 @@ package entities
 
 import (
 	"log"
-	"simple-go-game/internal/assets"
-	"simple-go-game/internal/core"
+	"flappy-go/internal/assets"
+	"flappy-go/internal/core"
 
-	physics "simple-go-game/internal/core/physics"
+	physics "flappy-go/internal/core/physics"
 
 	raylib "github.com/gen2brain/raylib-go/raylib"
 )
