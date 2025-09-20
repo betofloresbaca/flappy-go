@@ -28,5 +28,13 @@ func GameBoard() *core.Scene {
 	pipeGenerator := entities.NewPipeGateGenerator(scene, speed)
 	pipeGenerator.Running = true
 	scene.Add(pipeGenerator)
+	//Add The start message
+	startMessage := entities.NewInstructionsMessage(scene)
+	startMessage.Hide()
+	scene.Add(startMessage)
+	// Add the game over message
+	gameOverMessage := entities.NewGameOverMessage(scene)
+	gameOverMessage.Hide()
+	scene.Add(gameOverMessage)
 	return scene
 }
