@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"log"
 	"simple-go-game/internal/assets"
 	"simple-go-game/internal/core"
 
@@ -16,6 +17,7 @@ const (
 	Player_StartPositionY     = 100
 	Player_MaxVelocityY       = 500.0
 	Player_JumpForce          = 300.0
+	Player_DeathForce         = 800.0
 	Player_MaxRotation        = 75.0
 	Player_AnimationFrameTime = 0.2
 )
@@ -28,10 +30,10 @@ type Player struct {
 	*core.BaseDrawable
 	// Player-specific properties
 	transform      core.Transform
-	speed          float32
 	animatedSprite core.AnimatedSprite
 	body           *physics.Body
 	score          *ScoreDisplay
+	isDead         bool
 }
 
 // NewPlayer creates a new player entity at the specified position.
@@ -47,9 +49,9 @@ func NewPlayer(parent *core.Scene, color string, score *ScoreDisplay) *Player {
 		BasePausable:   core.NewBasePausable(),
 		BaseDrawable:   core.NewBaseDrawable(Player_ZIndex),
 		transform:      *core.NewTransform(Player_StartPositionX, Player_StartPositionY),
-		speed:          100.0, // pixels per second
 		animatedSprite: *animatedSprite,
 		score:          score,
+		isDead:         false,
 	}
 }
 
@@ -58,16 +60,16 @@ func (p *Player) Update(dt float32) {
 	if p.IsPaused() {
 		return
 	}
-
-	p.animatedSprite.Update(dt)
-
-	// Input: jump (impulso directo en velocidad vertical)
-	if raylib.IsKeyPressed(raylib.KeySpace) ||
-		raylib.IsMouseButtonPressed(raylib.MouseLeftButton) {
-		if p.body != nil {
-			p.body.Velocity.Y = -Player_JumpForce
+	if !p.isDead {
+		p.animatedSprite.Update(dt)
+		// Input: jump
+		if raylib.IsKeyPressed(raylib.KeySpace) ||
+			raylib.IsMouseButtonPressed(raylib.MouseLeftButton) {
+			if p.body != nil {
+				p.body.Velocity.Y = -Player_JumpForce
+			}
+			p.score.Increment()
 		}
-		p.score.Increment()
 	}
 
 	// Clamp de velocidad vertical para controlar la sensación arcade
@@ -130,10 +132,11 @@ func (p *Player) OnRemove() {
 	p.body.Destroy()
 }
 
-func (p *Player) OnCollision(other *physics.Body) {
-	if p.IsPaused() {
+func (p *Player) OnCollision(other *physics.Body, manifold *physics.Manifold) {
+	if p.IsPaused() || p.isDead {
 		return
 	}
+	log.Println("Player collided with", other.Tag)
 	gates := p.GetParent().GetEntitiesByGroup("pipe_gate")
 	ground := p.GetParent().GetEntitiesByGroup("ground")
 
@@ -150,7 +153,7 @@ func (p *Player) OnCollision(other *physics.Body) {
 			pausable.Pause()
 		}
 	}
-	p.score.Increment()
+	p.isDead = true
 }
 
 func (p *Player) Pause() {

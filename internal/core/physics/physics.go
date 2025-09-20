@@ -89,7 +89,7 @@ type Body struct {
 	// Tag identifier for specific body identification
 	Tag string
 	// Collision callback function
-	OnCollision func(other *Body)
+	OnCollision func(other *Body, manifold *Manifold)
 }
 
 // Manifold type
@@ -935,12 +935,12 @@ func solveManifold(manifold *Manifold) {
 	if manifold.ContactsCount > 0 {
 		// Call BodyA's callback, if it exists, passing BodyB
 		if manifold.BodyA.OnCollision != nil {
-			manifold.BodyA.OnCollision(manifold.BodyB)
+			manifold.BodyA.OnCollision(manifold.BodyB, manifold)
 		}
 
 		// Call BodyB's callback, if it exists, passing BodyA
 		if manifold.BodyB.OnCollision != nil {
-			manifold.BodyB.OnCollision(manifold.BodyA)
+			manifold.BodyB.OnCollision(manifold.BodyA, manifold)
 		}
 	}
 }
