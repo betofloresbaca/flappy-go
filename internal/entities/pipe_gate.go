@@ -27,6 +27,7 @@ type PipeGate struct {
 	Running      bool
 	topBody      *physics.Body
 	bottomBody   *physics.Body
+	scoreBody    *physics.Body
 	initialX     float32 // Only used for initialization
 }
 
@@ -59,6 +60,9 @@ func (pg *PipeGate) Update(dt float32) {
 	if pg.bottomBody != nil {
 		pg.bottomBody.Velocity.X = -pg.speed
 	}
+	if pg.scoreBody != nil {
+		pg.scoreBody.Velocity.X = -pg.speed
+	}
 
 	// Check if pipes have passed (using topBody position)
 	if pg.topBody != nil {
@@ -79,6 +83,7 @@ func (pg *PipeGate) Draw() {
 	if pg.bottomBody != nil {
 		pg.bottomSprite.Draw(*core.NewTransform(pg.bottomBody.Position.X, pg.bottomBody.Position.Y))
 	}
+
 }
 
 // GetX returns the current X position of the pipe gate
@@ -99,7 +104,7 @@ func (pg *PipeGate) OnAdd() {
 	topCenterX := pg.initialX + pipeWidth/2
 	topCenterY := (pg.gapY - float32(PipeGate_GapHeight/2)) - pipeHeight/2
 	pg.topBody = physics.NewBodyRectangle(
-		"PipeGate",
+		"pipe_gate",
 		raylib.Vector2{X: topCenterX, Y: topCenterY},
 		pipeWidth,
 		pipeHeight,
@@ -107,11 +112,23 @@ func (pg *PipeGate) OnAdd() {
 	)
 	pg.topBody.UseGravity = false
 
+	// Score body (covers the gap between pipes)
+	scoreCenterX := pg.initialX + pipeWidth/2
+	scoreCenterY := pg.gapY
+	scoreWidth := pipeWidth / 4
+	scoreHeight := float32(PipeGate_GapHeight)
+	pg.scoreBody = physics.NewTriggerRectangle(
+		"pipe_gate_score",
+		raylib.Vector2{X: scoreCenterX, Y: scoreCenterY},
+		scoreWidth,
+		scoreHeight,
+	)
+
 	// Bottom pipe (below the gap, pivot UpLeft)
 	bottomCenterX := pg.initialX + pipeWidth/2
 	bottomCenterY := (pg.gapY + float32(PipeGate_GapHeight/2)) + pipeHeight/2
 	pg.bottomBody = physics.NewBodyRectangle(
-		"PipeGate",
+		"pipe_gate",
 		raylib.Vector2{X: bottomCenterX, Y: bottomCenterY},
 		pipeWidth,
 		pipeHeight,
@@ -122,6 +139,7 @@ func (pg *PipeGate) OnAdd() {
 	if pg.IsPaused() {
 		pg.topBody.Enabled = false
 		pg.bottomBody.Enabled = false
+		pg.scoreBody.Enabled = false
 	}
 }
 
@@ -143,6 +161,9 @@ func (pg *PipeGate) Pause() {
 	if pg.topBody != nil {
 		pg.topBody.Enabled = false
 	}
+	if pg.scoreBody != nil {
+		pg.scoreBody.Enabled = false
+	}
 	if pg.bottomBody != nil {
 		pg.bottomBody.Enabled = false
 	}
@@ -152,6 +173,9 @@ func (pg *PipeGate) Resume() {
 	pg.BasePausable.Resume()
 	if pg.topBody != nil {
 		pg.topBody.Enabled = true
+	}
+	if pg.scoreBody != nil {
+		pg.scoreBody.Enabled = true
 	}
 	if pg.bottomBody != nil {
 		pg.bottomBody.Enabled = true

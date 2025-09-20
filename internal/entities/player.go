@@ -60,7 +60,11 @@ func (p *Player) Update(dt float32) {
 	if p.IsPaused() {
 		return
 	}
-	if !p.isDead {
+	if p.isDead {
+		if p.body != nil {
+			p.body.Velocity.X = 0
+		}
+	} else {
 		p.animatedSprite.Update(dt)
 		// Input: jump
 		if raylib.IsKeyPressed(raylib.KeySpace) ||
@@ -68,7 +72,6 @@ func (p *Player) Update(dt float32) {
 			if p.body != nil {
 				p.body.Velocity.Y = -Player_JumpForce
 			}
-			p.score.Increment()
 		}
 	}
 
@@ -137,6 +140,17 @@ func (p *Player) OnCollision(other *physics.Body, manifold *physics.Manifold) {
 		return
 	}
 	log.Println("Player collided with", other.Tag)
+	switch other.Tag {
+	case "pipe_gate_score":
+		other.Destroy() // Disable score trigger after scoring
+		p.score.Increment()
+	case "ground", "pipe_gate":
+		p.Die()
+	}
+
+}
+
+func (p *Player) Die() {
 	gates := p.GetParent().GetEntitiesByGroup("pipe_gate")
 	ground := p.GetParent().GetEntitiesByGroup("ground")
 
