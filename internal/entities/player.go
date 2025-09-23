@@ -3,6 +3,7 @@ package entities
 import (
 	"flappy-go/internal/assets"
 	"flappy-go/internal/core"
+	"flappy-go/internal/ui"
 	"log"
 
 	physics "flappy-go/internal/core/physics"
@@ -30,7 +31,7 @@ type Player struct {
 	*core.BaseDrawer
 	animatedSprite *core.AnimatedSprite
 	body           *physics.Body
-	scoreDisplay   *ScoreDisplay
+	scoreDisplay   *ui.ScoreDisplay
 	transform      core.Transform
 	isDead         bool
 }
@@ -161,14 +162,9 @@ func (p *Player) onCollision(other *physics.Body, manifold *physics.Manifold) {
 	}
 }
 
-func (p *Player) searchScoreDisplay() *ScoreDisplay {
+func (p *Player) searchScoreDisplay() *ui.ScoreDisplay {
 	if p.scoreDisplay == nil {
-		entities := p.Parent().GetEntitiesByGroup("score_display")
-		if len(entities) > 0 {
-			if score, ok := entities[0].(*ScoreDisplay); ok {
-				p.scoreDisplay = score
-			}
-		}
+		p.scoreDisplay = p.Root().Child("ui").(*core.Scene).Child("score_display").(*ui.ScoreDisplay)
 		if p.scoreDisplay == nil {
 			log.Println("Warning: Player could not find ScoreDisplay entity in scene")
 		}
@@ -177,8 +173,8 @@ func (p *Player) searchScoreDisplay() *ScoreDisplay {
 }
 
 func (p *Player) die() {
-	pipeGates := p.Parent().GetEntitiesByGroup("pipe_gate")
-	ground := p.Parent().GetEntitiesByGroup("ground")
+	pipeGates := p.Parent().Children("pipe_gate", false)
+	ground := p.Parent().Children("ground", false)
 	// Pause all gates
 	for _, gate := range pipeGates {
 		if updater, ok := gate.(*PipeGate); ok {

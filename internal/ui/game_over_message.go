@@ -1,4 +1,4 @@
-package entities
+package ui
 
 import (
 	"flappy-go/internal/assets"

@@ -15,8 +15,10 @@ type Entity interface {
 	Group() string
 	// Set group of the entity
 	SetGroup(group string)
-	// Parent scene
+	// Parent entity
 	Parent() *Scene
+	// The root entity
+	Root() *Scene
 	// Call when entity is added to the scene
 	added()
 	// Call when entity is removed from the scene
@@ -62,9 +64,17 @@ func (e *BaseEntity) SetGroup(group string) {
 	e.group = group
 }
 
-// Parent returns the parent scene of the entity. Default is nil.
+// Parent returns the parent entity of the entity. Default is nil.
 func (e BaseEntity) Parent() *Scene {
 	return e.parent
+}
+
+// Root returns the root entity of the entity. Default is nil.
+func (e *BaseEntity) Root() *Scene {
+	if e.parent == nil {
+		return nil
+	}
+	return e.parent.Root()
 }
 
 func (e BaseEntity) added() {

@@ -48,7 +48,7 @@ func (pgg *PipeGateGenerator) addPipe(x float32) {
 	newPipe := NewPipeGate(pgg.BaseEntity.Parent(), x, pgg.speed)
 	newPipe.Running = true
 	pgg.lastPipeGate = newPipe
-	pgg.BaseEntity.Parent().Add(newPipe)
+	pgg.Parent().Add(newPipe)
 }
 
 func (pgg *PipeGateGenerator) getNextXStart() float32 {

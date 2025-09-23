@@ -88,9 +88,9 @@ func (s *Scene) Remove(e Entity) {
 	e.removed()
 }
 
-// GetEntityById returns the entity with the given ID, or nil if not found.
+// ChildById returns the entity with the given ID, or nil if not found.
 // The second return value indicates whether the entity was found.
-func (s *Scene) GetEntityById(id uint64) (Entity, bool) {
+func (s *Scene) ChildById(id uint64) (Entity, bool) {
 	idx, exists := s.entityIndices[id]
 	if !exists {
 		return nil, false
@@ -98,14 +98,36 @@ func (s *Scene) GetEntityById(id uint64) (Entity, bool) {
 	return s.entities[idx], true
 }
 
-func (s *Scene) GetEntitiesByGroup(group string) []Entity {
+func (s *Scene) Children(group string, recursive bool) []Entity {
 	var result []Entity
 	for _, e := range s.entities {
 		if e.Group() == group {
 			result = append(result, e)
 		}
+		if recursive {
+			if childScene, ok := e.(*Scene); ok {
+				result = append(result, childScene.Children(group, true)...)
+			}
+		}
 	}
 	return result
+}
+
+func (s *Scene) Child(group string) Entity {
+	for _, e := range s.entities {
+		if e.Group() == group {
+			return e
+		}
+	}
+	return nil
+}
+
+// Root returns the root scene. If this scene has no parent, it is the root.
+func (s *Scene) Root() *Scene {
+	if s.parent == nil {
+		return s
+	}
+	return s.parent.Root()
 }
 
 // Update calls the Update method on all entities in the scene.
