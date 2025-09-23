@@ -6,6 +6,7 @@ import (
 )
 
 const (
+	Background_Name         = "background"
 	Background_ZIndex       = -1000
 	Background_SpritePivot  = core.PivotUpLeft
 	Background_ImagesNumber = 3
@@ -19,7 +20,7 @@ type Background struct {
 
 func NewBackground(parent *core.Scene, style string) *Background {
 	return &Background{
-		BaseEntity: core.NewBaseEntity(parent, "background"),
+		BaseEntity: core.NewBaseEntity(parent, Background_Name, ""),
 		BaseDrawer: core.NewBaseDrawer(Background_ZIndex),
 		sprite:     *core.NewSprite(assets.BackgroundImages[style], Background_SpritePivot),
 	}

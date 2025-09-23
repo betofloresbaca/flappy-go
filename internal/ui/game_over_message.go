@@ -18,7 +18,7 @@ func NewGameOverMessage(
 	parent *core.Scene,
 ) *GameOverMessage {
 	return &GameOverMessage{
-		BaseEntity: core.NewBaseEntity(parent, "game_over_message"),
+		BaseEntity: core.NewBaseEntity(parent, "game_over_message", ""),
 		BaseDrawer: core.NewBaseDrawer(2000),
 		sprite:     core.NewSprite(assets.GameOverImage, core.PivotCenter),
 		transform: core.Transform{

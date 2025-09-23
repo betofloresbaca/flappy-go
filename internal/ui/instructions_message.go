@@ -18,7 +18,7 @@ func NewInstructionsMessage(
 	parent *core.Scene,
 ) *InstructionsMessage {
 	return &InstructionsMessage{
-		BaseEntity: core.NewBaseEntity(parent, "instructions_message"),
+		BaseEntity: core.NewBaseEntity(parent, "instructions_message", ""),
 		BaseDrawer: core.NewBaseDrawer(2000),
 		sprite:     core.NewSprite(assets.MessageImage, core.PivotCenter),
 		transform: core.Transform{

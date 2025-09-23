@@ -24,9 +24,9 @@ type Scene struct {
 }
 
 // NewScene creates a new empty scene.
-func NewScene(parent *Scene, group string, zIndex int) *Scene {
+func NewScene(parent *Scene, name string, group string, zIndex int) *Scene {
 	s := &Scene{
-		BaseEntity:    NewBaseEntity(parent, group),
+		BaseEntity:    NewBaseEntity(parent, name, group),
 		BaseUpdater:   NewBaseUpdater(),
 		BaseDrawer:    NewBaseDrawer(zIndex),
 		entities:      make([]Entity, 0),
@@ -40,9 +40,9 @@ func NewScene(parent *Scene, group string, zIndex int) *Scene {
 }
 
 // NewPhysicsScene creates a new empty physics scene.
-func NewPhysicsScene(parent *Scene, group string, zIndex int, gravity raylib.Vector2) *Scene {
+func NewPhysicsScene(parent *Scene, name string, group string, zIndex int, gravity raylib.Vector2) *Scene {
 	s := &Scene{
-		BaseEntity:    NewBaseEntity(parent, group),
+		BaseEntity:    NewBaseEntity(parent, name, group),
 		BaseUpdater:   NewBaseUpdater(),
 		BaseDrawer:    NewBaseDrawer(zIndex),
 		entities:      make([]Entity, 0),
@@ -98,7 +98,7 @@ func (s *Scene) ChildById(id uint64) (Entity, bool) {
 	return s.entities[idx], true
 }
 
-func (s *Scene) Children(group string, recursive bool) []Entity {
+func (s *Scene) ChildrenByGroup(group string, recursive bool) []Entity {
 	var result []Entity
 	for _, e := range s.entities {
 		if e.Group() == group {
@@ -106,16 +106,16 @@ func (s *Scene) Children(group string, recursive bool) []Entity {
 		}
 		if recursive {
 			if childScene, ok := e.(*Scene); ok {
-				result = append(result, childScene.Children(group, true)...)
+				result = append(result, childScene.ChildrenByGroup(group, true)...)
 			}
 		}
 	}
 	return result
 }
 
-func (s *Scene) Child(group string) Entity {
+func (s *Scene) ChildByName(name string) Entity {
 	for _, e := range s.entities {
-		if e.Group() == group {
+		if e.Name() == name {
 			return e
 		}
 	}

@@ -9,8 +9,11 @@ import (
 // Entity represents a game object that can be updated and managed by the scene.
 // All entities must have a unique ID and implement lifecycle methods.
 type Entity interface {
-	// Id returns the unique identifier for this entity.
+	// Id returns the unique identifier for this entity. It is unique across all entities.
 	Id() uint64
+	// Name returns the name of the entity.
+	// It can be repeated across different entities but must be unique within the same parent.
+	Name() string
 	// Get group of the entity
 	Group() string
 	// Set group of the entity
@@ -31,6 +34,7 @@ var nextId uint64
 // It handles ID generation and provides default empty implementations of lifecycle methods.
 type BaseEntity struct {
 	id       uint64
+	name     string
 	group    string
 	parent   *Scene
 	OnAdd    func()
@@ -38,9 +42,10 @@ type BaseEntity struct {
 }
 
 // NewBaseEntity creates a new BaseEntity with a unique ID.
-func NewBaseEntity(parent *Scene, group string) *BaseEntity {
+func NewBaseEntity(parent *Scene, name string, group string) *BaseEntity {
 	return &BaseEntity{
 		id:     atomic.AddUint64(&nextId, 1),
+		name:   name,
 		group:  group,
 		parent: parent,
 	}
@@ -49,6 +54,11 @@ func NewBaseEntity(parent *Scene, group string) *BaseEntity {
 // Id returns the unique identifier for this entity.
 func (e BaseEntity) Id() uint64 {
 	return e.id
+}
+
+// Name returns the name of the entity.
+func (e BaseEntity) Name() string {
+	return e.name
 }
 
 // Update provides a default empty implementation of the Update method.

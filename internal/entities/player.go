@@ -45,7 +45,7 @@ func NewPlayer(parent *core.Scene, color string) *Player {
 	}
 	animatedSprite.SetAnimation(color)
 	p := &Player{
-		BaseEntity:     core.NewBaseEntity(parent, "player"),
+		BaseEntity:     core.NewBaseEntity(parent, "player", ""),
 		BaseUpdater:    core.NewBaseUpdater(),
 		BaseDrawer:     core.NewBaseDrawer(Player_ZIndex),
 		animatedSprite: animatedSprite,
@@ -164,7 +164,7 @@ func (p *Player) onCollision(other *physics.Body, manifold *physics.Manifold) {
 
 func (p *Player) searchScoreDisplay() *ui.ScoreDisplay {
 	if p.scoreDisplay == nil {
-		p.scoreDisplay = p.Root().Child("ui").(*core.Scene).Child("score_display").(*ui.ScoreDisplay)
+		p.scoreDisplay = p.Root().ChildByName("ui").(*core.Scene).ChildByName("score_display").(*ui.ScoreDisplay)
 		if p.scoreDisplay == nil {
 			log.Println("Warning: Player could not find ScoreDisplay entity in scene")
 		}
@@ -173,8 +173,8 @@ func (p *Player) searchScoreDisplay() *ui.ScoreDisplay {
 }
 
 func (p *Player) die() {
-	pipeGates := p.Parent().Children("pipe_gate", false)
-	ground := p.Parent().Children("ground", false)
+	pipeGates := p.Parent().ChildrenByGroup("pipe_gate", false)
+	ground := p.Parent().ChildByName("ground").(*Ground)
 	// Pause all gates
 	for _, gate := range pipeGates {
 		if updater, ok := gate.(*PipeGate); ok {
@@ -183,10 +183,6 @@ func (p *Player) die() {
 	}
 
 	// Pause the ground entity (only one expected)
-	if len(ground) > 0 {
-		if updater, ok := ground[0].(*Ground); ok {
-			updater.Pause()
-		}
-	}
+	ground.Pause()
 	p.isDead = true
 }

@@ -25,7 +25,7 @@ type Ground struct {
 
 func NewGround(parent *core.Scene, speed float32) *Ground {
 	g := &Ground{
-		BaseEntity:  core.NewBaseEntity(parent, "ground"),
+		BaseEntity:  core.NewBaseEntity(parent, "ground", ""),
 		BaseUpdater: core.NewBaseUpdater(),
 		BaseDrawer:  core.NewBaseDrawer(Ground_ZIndex),
 		sprite:      *core.NewSprite(assets.GroundImage, core.PivotUpLeft),

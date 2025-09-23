@@ -3,6 +3,7 @@ package entities
 import (
 	"flappy-go/internal/assets"
 	"flappy-go/internal/core"
+	"fmt"
 
 	physics "flappy-go/internal/core/physics"
 
@@ -10,6 +11,7 @@ import (
 )
 
 const (
+	PipeGate_Group     = "pipe_gate"
 	PipeGate_ZIndex    = -300
 	PipeGate_GapYMin   = 100
 	PipeGate_GapYMax   = 350
@@ -31,13 +33,13 @@ type PipeGate struct {
 	initialX     float32 // Only used for initialization
 }
 
-func NewPipeGate(parent *core.Scene, x, speed float32) *PipeGate {
+func NewPipeGate(parent *core.Scene, index int, x, speed float32) *PipeGate {
 	topSprite := core.NewSprite(assets.PipeSprites["green"], core.PivotCenter)
 	topSprite.FlipV = true
 	bottomSprite := core.NewSprite(assets.PipeSprites["green"], core.PivotCenter)
 
 	pg := &PipeGate{
-		BaseEntity:   core.NewBaseEntity(parent, "pipe_gate"),
+		BaseEntity:   core.NewBaseEntity(parent, fmt.Sprintf("pipe_gate_%d", index), "pipe_gate"),
 		BaseUpdater:  core.NewBaseUpdater(),
 		BaseDrawer:   core.NewBaseDrawer(PipeGate_ZIndex),
 		topSprite:    topSprite,

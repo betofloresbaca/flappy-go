@@ -28,7 +28,7 @@ func NewScoreDisplay(parent *core.Scene) *ScoreDisplay {
 		sprites[i] = *core.NewSprite(assets.NumberImages[i], core.PivotUpLeft)
 	}
 	score := ScoreDisplay{
-		BaseEntity:    core.NewBaseEntity(parent, "score_display"),
+		BaseEntity:    core.NewBaseEntity(parent, "score_display", ""),
 		BaseDrawer:    core.NewBaseDrawer(ScoreDisplay_ZIndex),
 		value:         0,
 		numberSprites: sprites,
