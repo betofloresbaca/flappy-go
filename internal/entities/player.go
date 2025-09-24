@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	Player_Name               = "player"
 	Player_ZIndex             = 0
 	Player_Size               = 20
 	Player_StartPositionX     = 150
@@ -45,7 +46,7 @@ func NewPlayer(parent *core.Scene, color string) *Player {
 	}
 	animatedSprite.SetAnimation(color)
 	p := &Player{
-		BaseEntity:     core.NewBaseEntity(parent, "player", ""),
+		BaseEntity:     core.NewBaseEntity(parent, Player_Name, []string{}),
 		BaseUpdater:    core.NewBaseUpdater(),
 		BaseDrawer:     core.NewBaseDrawer(Player_ZIndex),
 		animatedSprite: animatedSprite,
@@ -154,17 +155,19 @@ func (p *Player) onCollision(other *physics.Body, manifold *physics.Manifold) {
 	}
 	log.Println("Player collided with", other.Tag)
 	switch other.Tag {
-	case "pipe_gate_score":
+	case PipeGate_ScoreTriggerTag:
 		other.Destroy() // Disable score trigger after scoring
 		p.searchScoreDisplay().Increment()
-	case "ground", "pipe_gate":
+	case Ground_BodyTag, PipeGate_PipeBodyTag:
 		p.die()
 	}
 }
 
 func (p *Player) searchScoreDisplay() *ui.ScoreDisplay {
 	if p.scoreDisplay == nil {
-		p.scoreDisplay = p.Root().ChildByName("ui").(*core.Scene).ChildByName("score_display").(*ui.ScoreDisplay)
+		p.scoreDisplay = p.Root().
+			ChildByName("ui").(*core.Scene).
+			ChildByName("score_display").(*ui.ScoreDisplay)
 		if p.scoreDisplay == nil {
 			log.Println("Warning: Player could not find ScoreDisplay entity in scene")
 		}
@@ -173,8 +176,8 @@ func (p *Player) searchScoreDisplay() *ui.ScoreDisplay {
 }
 
 func (p *Player) die() {
-	pipeGates := p.Parent().ChildrenByGroup("pipe_gate", false)
-	ground := p.Parent().ChildByName("ground").(*Ground)
+	pipeGates := p.Parent().ChildrenByGroup(PipeGate_Group, false)
+	ground := p.Parent().ChildByName(Ground_Name).(*Ground)
 	// Pause all gates
 	for _, gate := range pipeGates {
 		if updater, ok := gate.(*PipeGate); ok {

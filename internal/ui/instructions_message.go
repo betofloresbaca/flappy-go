@@ -7,6 +7,10 @@ import (
 	raylib "github.com/gen2brain/raylib-go/raylib"
 )
 
+const (
+	InstructionsMessage_Name = "instructions_message"
+)
+
 type InstructionsMessage struct {
 	*core.BaseEntity
 	*core.BaseDrawer
@@ -18,8 +22,8 @@ func NewInstructionsMessage(
 	parent *core.Scene,
 ) *InstructionsMessage {
 	return &InstructionsMessage{
-		BaseEntity: core.NewBaseEntity(parent, "instructions_message", ""),
-		BaseDrawer: core.NewBaseDrawer(2000),
+		BaseEntity: core.NewBaseEntity(parent, InstructionsMessage_Name, []string{}),
+		BaseDrawer: core.NewBaseDrawer(0),
 		sprite:     core.NewSprite(assets.MessageImage, core.PivotCenter),
 		transform: core.Transform{
 			Position: raylib.Vector2{

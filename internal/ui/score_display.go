@@ -9,6 +9,7 @@ import (
 )
 
 const (
+	ScoreDisplay_Name      = "score_display"
 	ScoreDisplay_ZIndex    = 1000
 	ScoreDisplay_PositionY = 5
 )
@@ -20,6 +21,7 @@ type ScoreDisplay struct {
 	numberSprites [10]core.Sprite
 	numberWidth   float32
 	drawArray     []core.Sprite
+	startX        float32
 }
 
 func NewScoreDisplay(parent *core.Scene) *ScoreDisplay {
@@ -28,7 +30,7 @@ func NewScoreDisplay(parent *core.Scene) *ScoreDisplay {
 		sprites[i] = *core.NewSprite(assets.NumberImages[i], core.PivotUpLeft)
 	}
 	score := ScoreDisplay{
-		BaseEntity:    core.NewBaseEntity(parent, "score_display", ""),
+		BaseEntity:    core.NewBaseEntity(parent, ScoreDisplay_Name, []string{}),
 		BaseDrawer:    core.NewBaseDrawer(ScoreDisplay_ZIndex),
 		value:         0,
 		numberSprites: sprites,
@@ -50,8 +52,10 @@ func (s *ScoreDisplay) Reset() {
 
 func (s *ScoreDisplay) calculateDrawArray() {
 	scoreStr := fmt.Sprintf("%d", s.value)
-	s.drawArray = s.drawArray[:0] // Clear the slice while retaining capacity
+	totalWidth := float32(len(scoreStr)) * s.numberWidth
+	s.startX = float32(raylib.GetScreenWidth()/2) - totalWidth/2
 
+	s.drawArray = s.drawArray[:0] // Clear the slice while retaining capacity
 	for _, char := range scoreStr {
 		digit := char - '0'
 		if digit < 0 || digit > 9 {
@@ -62,12 +66,9 @@ func (s *ScoreDisplay) calculateDrawArray() {
 }
 
 func (s *ScoreDisplay) Draw() {
-	scoreStr := fmt.Sprintf("%d", s.value)
-	totalWidth := float32(len(scoreStr)) * s.numberWidth
-	startX := float32(raylib.GetScreenWidth()/2) - totalWidth/2
 
 	for i, sprite := range s.drawArray {
-		x := startX + float32(i)*s.numberWidth
+		x := s.startX + float32(i)*s.numberWidth
 		sprite.Draw(*core.NewTransform(x, ScoreDisplay_PositionY))
 	}
 }

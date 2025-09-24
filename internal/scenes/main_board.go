@@ -9,7 +9,7 @@ import (
 )
 
 func MainScene() *core.Scene {
-	scene := core.NewScene(nil, "main_scene", "", 0)
+	scene := core.NewScene(nil, "main_scene", []string{}, 0)
 	gameBoard := gameBoard(scene)
 	scene.Add(gameBoard)
 	ui := userInterface(scene)
@@ -20,7 +20,7 @@ func MainScene() *core.Scene {
 func gameBoard(parent *core.Scene) *core.Scene {
 	var speed float32 = 100.0
 	// Physics now runs in seconds; use player gravity constant (pixels/s^2)
-	scene := core.NewPhysicsScene(parent, "game_board", "", 0, raylib.Vector2{X: 0, Y: 800}) // Gravity pointing downwards
+	scene := core.NewPhysicsScene(parent, "game_board", []string{}, 0, raylib.Vector2{X: 0, Y: 800}) // Gravity pointing downwards
 
 	// Add the player to the scene
 	player := entities.NewPlayer(scene, "red")
@@ -39,7 +39,7 @@ func gameBoard(parent *core.Scene) *core.Scene {
 }
 
 func userInterface(parent *core.Scene) *core.Scene {
-	scene := core.NewScene(parent, "ui", "", 100)
+	scene := core.NewScene(parent, "ui", []string{}, 100)
 	// Add the score display to the scene
 	scoreDisplay := ui.NewScoreDisplay(scene)
 	scene.Add(scoreDisplay)

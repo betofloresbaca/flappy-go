@@ -7,6 +7,10 @@ import (
 	raylib "github.com/gen2brain/raylib-go/raylib"
 )
 
+const (
+	GameOverMessage_Name = "game_over_message"
+)
+
 type GameOverMessage struct {
 	*core.BaseEntity
 	*core.BaseDrawer
@@ -18,8 +22,8 @@ func NewGameOverMessage(
 	parent *core.Scene,
 ) *GameOverMessage {
 	return &GameOverMessage{
-		BaseEntity: core.NewBaseEntity(parent, "game_over_message", ""),
-		BaseDrawer: core.NewBaseDrawer(2000),
+		BaseEntity: core.NewBaseEntity(parent, GameOverMessage_Name, []string{}),
+		BaseDrawer: core.NewBaseDrawer(0),
 		sprite:     core.NewSprite(assets.GameOverImage, core.PivotCenter),
 		transform: core.Transform{
 			Position: raylib.Vector2{

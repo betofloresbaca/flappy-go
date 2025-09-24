@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	PipeGateGenerator_Name             = "pipe_gate_generator"
 	PipeGateGenerator_HSpacing         = 150
 	PipeGateGenerator_XStart           = 400
 	PipeGateGenerator_PreloadZoneWidth = 100
@@ -23,7 +24,7 @@ type PipeGateGenerator struct {
 
 func NewPipeGateGenerator(parent *core.Scene, speed float32) *PipeGateGenerator {
 	return &PipeGateGenerator{
-		BaseEntity:  core.NewBaseEntity(parent, "pipe_gate_generator", ""),
+		BaseEntity:  core.NewBaseEntity(parent, PipeGateGenerator_Name, []string{}),
 		BaseUpdater: core.NewBaseUpdater(),
 		speed:       speed,
 	}

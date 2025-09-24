@@ -9,8 +9,10 @@ import (
 )
 
 const (
-	Ground_ZIndex = -100
-	Ground_Y      = 440
+	Ground_Name    = "ground"
+	Ground_BodyTag = "ground"
+	Ground_ZIndex  = -100
+	Ground_Y       = 440
 )
 
 type Ground struct {
@@ -25,7 +27,7 @@ type Ground struct {
 
 func NewGround(parent *core.Scene, speed float32) *Ground {
 	g := &Ground{
-		BaseEntity:  core.NewBaseEntity(parent, "ground", ""),
+		BaseEntity:  core.NewBaseEntity(parent, Ground_Name, []string{}),
 		BaseUpdater: core.NewBaseUpdater(),
 		BaseDrawer:  core.NewBaseDrawer(Ground_ZIndex),
 		sprite:      *core.NewSprite(assets.GroundImage, core.PivotUpLeft),
@@ -67,7 +69,7 @@ func (g *Ground) onAdd() {
 
 	// Create static body (density 0 makes it static)
 	g.body = physics.NewBodyRectangle(
-		g.Group(),
+		Ground_BodyTag,
 		raylib.Vector2{X: centerX, Y: centerY},
 		groundWidth,
 		groundHeight,

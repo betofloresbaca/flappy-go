@@ -11,11 +11,13 @@ import (
 )
 
 const (
-	PipeGate_Group     = "pipe_gate"
-	PipeGate_ZIndex    = -300
-	PipeGate_GapYMin   = 100
-	PipeGate_GapYMax   = 350
-	PipeGate_GapHeight = 100
+	PipeGate_Group           = "pipe_gate"
+	PipeGate_ScoreTriggerTag = "pipe_gate_score"
+	PipeGate_PipeBodyTag     = "pipe_gate_body"
+	PipeGate_ZIndex          = -300
+	PipeGate_GapYMin         = 100
+	PipeGate_GapYMax         = 350
+	PipeGate_GapHeight       = 100
 )
 
 type PipeGate struct {
@@ -39,7 +41,11 @@ func NewPipeGate(parent *core.Scene, index int, x, speed float32) *PipeGate {
 	bottomSprite := core.NewSprite(assets.PipeSprites["green"], core.PivotCenter)
 
 	pg := &PipeGate{
-		BaseEntity:   core.NewBaseEntity(parent, fmt.Sprintf("pipe_gate_%d", index), "pipe_gate"),
+		BaseEntity: core.NewBaseEntity(
+			parent,
+			fmt.Sprintf("pipe_gate_%d", index),
+			[]string{PipeGate_Group},
+		),
 		BaseUpdater:  core.NewBaseUpdater(),
 		BaseDrawer:   core.NewBaseDrawer(PipeGate_ZIndex),
 		topSprite:    topSprite,
@@ -111,7 +117,7 @@ func (pg *PipeGate) onAdd() {
 	topCenterX := pg.initialX + pipeWidth/2
 	topCenterY := (pg.gapY - float32(PipeGate_GapHeight/2)) - pipeHeight/2
 	pg.topBody = physics.NewBodyRectangle(
-		pg.Group(),
+		PipeGate_PipeBodyTag,
 		raylib.Vector2{X: topCenterX, Y: topCenterY},
 		pipeWidth,
 		pipeHeight,
@@ -125,7 +131,7 @@ func (pg *PipeGate) onAdd() {
 	scoreWidth := pipeWidth / 4
 	scoreHeight := float32(PipeGate_GapHeight)
 	pg.scoreBody = physics.NewTriggerRectangle(
-		"pipe_gate_score",
+		PipeGate_ScoreTriggerTag,
 		raylib.Vector2{X: scoreCenterX, Y: scoreCenterY},
 		scoreWidth,
 		scoreHeight,
@@ -135,7 +141,7 @@ func (pg *PipeGate) onAdd() {
 	bottomCenterX := pg.initialX + pipeWidth/2
 	bottomCenterY := (pg.gapY + float32(PipeGate_GapHeight/2)) + pipeHeight/2
 	pg.bottomBody = physics.NewBodyRectangle(
-		pg.Group(),
+		PipeGate_PipeBodyTag,
 		raylib.Vector2{X: bottomCenterX, Y: bottomCenterY},
 		pipeWidth,
 		pipeHeight,
