@@ -52,6 +52,9 @@ type Body struct {
 	ID int
 	// Enabled dynamics state (collisions are calculated anyway)
 	Enabled bool
+	// Paused state: when true, the body is completely ignored by the physics
+	// pipeline (integration, collisions, triggers, callbacks).
+	Paused bool
 	// Physics body shape pivot
 	Position rl.Vector2
 	// Current linear velocity applied to position
@@ -193,6 +196,7 @@ func NewBodyCircle(tag string, pos rl.Vector2, radius, density float32) *Body {
 	newBody := &Body{
 		ID:              newID,
 		Enabled:         true,
+		Paused:          false,
 		Position:        pos,
 		Velocity:        rl.Vector2{},
 		Force:           rl.Vector2{},
@@ -239,6 +243,7 @@ func NewBodyRectangle(tag string, pos rl.Vector2, width, height, density float32
 	newBody := &Body{
 		ID:              newID,
 		Enabled:         true,
+		Paused:          false,
 		Position:        pos,
 		Velocity:        rl.Vector2{},
 		Force:           rl.Vector2{},
@@ -318,6 +323,7 @@ func NewBodyPolygon(tag string, pos rl.Vector2, radius float32, sides int, densi
 	newBody := &Body{
 		ID:              newID,
 		Enabled:         true,
+		Paused:          false,
 		Position:        pos,
 		Velocity:        rl.Vector2{},
 		Force:           rl.Vector2{},
@@ -768,13 +774,13 @@ func step() {
 	// Generate new collision information
 	for i := 0; i < bodiesCount; i++ {
 		bodyA := bodies[i]
-		if bodyA == nil {
+		if bodyA == nil || bodyA.Paused {
 			continue
 		}
 
 		for j := i + 1; j < bodiesCount; j++ {
 			var bodyB *Body = bodies[j]
-			if bodyB == nil || bodyA.InverseMass == 0 && bodyB.InverseMass == 0 {
+			if bodyB == nil || bodyB.Paused || bodyA.InverseMass == 0 && bodyB.InverseMass == 0 {
 				continue
 			}
 
@@ -802,7 +808,7 @@ func step() {
 
 	// Integrate forces to physics bodies
 	for i := 0; i < bodiesCount; i++ {
-		if body := bodies[i]; body != nil {
+		if body := bodies[i]; body != nil && !body.Paused {
 			integrateForces(body)
 		}
 	}
@@ -825,7 +831,7 @@ func step() {
 
 	// Integrate velocity to physics bodies
 	for i := 0; i < bodiesCount; i++ {
-		if body := bodies[i]; body != nil {
+		if body := bodies[i]; body != nil && !body.Paused {
 			integrateVelocity(body)
 		}
 	}
@@ -839,7 +845,7 @@ func step() {
 
 	// Clear physics bodies forces
 	for i := 0; i < bodiesCount; i++ {
-		if body := bodies[i]; body != nil {
+		if body := bodies[i]; body != nil && !body.Paused {
 			body.Force = rl.Vector2{}
 			body.Torque = 0
 		}
@@ -956,6 +962,13 @@ func destroyManifold(manifold *Manifold) {
 
 // solveManifold - Solves a created physics manifold between two physics bodies
 func solveManifold(manifold *Manifold) {
+	if manifold == nil || manifold.BodyA == nil || manifold.BodyB == nil {
+		return
+	}
+	// Do not solve or notify if any body is paused
+	if manifold.BodyA.Paused || manifold.BodyB.Paused {
+		return
+	}
 	switch manifold.BodyA.Shape.Type {
 	case CircleShape:
 		switch manifold.BodyB.Shape.Type {
@@ -982,12 +995,12 @@ func solveManifold(manifold *Manifold) {
 	// If the collision is real (there are contact points), trigger the callbacks.
 	if manifold.ContactsCount > 0 {
 		// Call BodyA's callback, if it exists, passing BodyB
-		if manifold.BodyA.OnCollision != nil {
+		if manifold.BodyA.OnCollision != nil && !manifold.BodyA.Paused && !manifold.BodyB.Paused {
 			manifold.BodyA.OnCollision(manifold.BodyB, manifold)
 		}
 
 		// Call BodyB's callback, if it exists, passing BodyA
-		if manifold.BodyB.OnCollision != nil {
+		if manifold.BodyB.OnCollision != nil && !manifold.BodyA.Paused && !manifold.BodyB.Paused {
 			manifold.BodyB.OnCollision(manifold.BodyA, manifold)
 		}
 	}
@@ -1273,7 +1286,7 @@ func solvePolygonToPolygon(manifold *Manifold) {
 
 // integrateForces - Integrates physics forces into velocity
 func integrateForces(body *Body) {
-	if body == nil || body.InverseMass == 0 || !body.Enabled || body.IsTrigger {
+	if body == nil || body.InverseMass == 0 || !body.Enabled || body.IsTrigger || body.Paused {
 		return
 	}
 
@@ -1295,6 +1308,9 @@ func initializeManifolds(manifold *Manifold) {
 	bodyA, bodyB := manifold.BodyA, manifold.BodyB
 
 	if bodyA == nil || bodyB == nil {
+		return
+	}
+	if bodyA.Paused || bodyB.Paused {
 		return
 	}
 
@@ -1335,7 +1351,7 @@ func integrateImpulses(manifold *Manifold) {
 	}
 
 	// Don't apply impulses if either body is a trigger
-	if bodyA.IsTrigger || bodyB.IsTrigger {
+	if bodyA.IsTrigger || bodyB.IsTrigger || bodyA.Paused || bodyB.Paused {
 		return
 	}
 
@@ -1381,7 +1397,7 @@ func integrateImpulses(manifold *Manifold) {
 		// Apply impulse to each physics body
 		impulseV := rl.NewVector2(manifold.Normal.X*impulse, manifold.Normal.Y*impulse)
 
-		if bodyA.Enabled {
+		if bodyA.Enabled && !bodyA.Paused {
 			bodyA.Velocity.X += bodyA.InverseMass * (-impulseV.X)
 			bodyA.Velocity.Y += bodyA.InverseMass * (-impulseV.Y)
 
@@ -1391,7 +1407,7 @@ func integrateImpulses(manifold *Manifold) {
 			}
 		}
 
-		if bodyB.Enabled {
+		if bodyB.Enabled && !bodyB.Paused {
 			bodyB.Velocity.X += bodyB.InverseMass * impulseV.X
 			bodyB.Velocity.Y += bodyB.InverseMass * impulseV.Y
 
@@ -1438,7 +1454,7 @@ func integrateImpulses(manifold *Manifold) {
 		}
 
 		// Apply friction impulse
-		if bodyA.Enabled {
+		if bodyA.Enabled && !bodyA.Paused {
 			bodyA.Velocity.X += bodyA.InverseMass * (-tangentImpulse.X)
 			bodyA.Velocity.Y += bodyA.InverseMass * (-tangentImpulse.Y)
 
@@ -1448,7 +1464,7 @@ func integrateImpulses(manifold *Manifold) {
 			}
 		}
 
-		if bodyB.Enabled {
+		if bodyB.Enabled && !bodyB.Paused {
 			bodyB.Velocity.X += bodyB.InverseMass * tangentImpulse.X
 			bodyB.Velocity.Y += bodyB.InverseMass * tangentImpulse.Y
 
@@ -1461,7 +1477,7 @@ func integrateImpulses(manifold *Manifold) {
 
 // integrateVelocity - Integrates physics velocity into position and forces
 func integrateVelocity(body *Body) {
-	if body == nil || !body.Enabled {
+	if body == nil || !body.Enabled || body.Paused {
 		return
 	}
 
@@ -1489,7 +1505,7 @@ func correctPositions(manifold *Manifold) {
 	}
 
 	// Don't correct positions if either body is a trigger
-	if bodyA.IsTrigger || bodyB.IsTrigger {
+	if bodyA.IsTrigger || bodyB.IsTrigger || bodyA.Paused || bodyB.Paused {
 		return
 	}
 
