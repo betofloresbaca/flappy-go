@@ -36,6 +36,8 @@ func NewScene(parent *Scene, name string, groups []string, zIndex int) *Scene {
 	}
 	s.BaseEntity.OnAdd = s.onAdd
 	s.BaseEntity.OnRemove = s.onRemove
+	s.BaseUpdater.OnPause = s.onPause
+	s.BaseUpdater.OnResume = s.onResume
 	return s
 }
 
@@ -139,6 +141,10 @@ func (s *Scene) Root() *Scene {
 // Update calls the Update method on all entities in the scene.
 // dt is the delta time in seconds since the last frame.
 func (s *Scene) Update(dt float32) {
+	// If the scene is paused, skip physics and child updates entirely
+	if s.Paused() {
+		return
+	}
 	if s.handlePhysics {
 		physics.Update()
 	}
@@ -197,4 +203,20 @@ func (s *Scene) onRemove() {
 	s.entities = nil
 	s.entityIndices = nil
 	s.inTree = false
+}
+
+func (s *Scene) onPause() {
+	for _, e := range s.entities {
+		if up, ok := e.(Updater); ok && !up.Paused() {
+			up.Pause()
+		}
+	}
+}
+
+func (s *Scene) onResume() {
+	for _, e := range s.entities {
+		if up, ok := e.(Updater); ok && up.Paused() {
+			up.Resume()
+		}
+	}
 }
