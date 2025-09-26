@@ -8,21 +8,21 @@ import (
 )
 
 const (
-	InstructionsMessage_Name = "instructions_message"
+	StartMessage_Name = "start_message"
 )
 
-type InstructionsMessage struct {
+type StartMessage struct {
 	*core.BaseEntity
 	*core.BaseDrawer
 	sprite    *core.Sprite
 	transform core.Transform
 }
 
-func NewInstructionsMessage(
+func NewStartMessage(
 	parent *core.Scene,
-) *InstructionsMessage {
-	return &InstructionsMessage{
-		BaseEntity: core.NewBaseEntity(parent, InstructionsMessage_Name, []string{}),
+) *StartMessage {
+	return &StartMessage{
+		BaseEntity: core.NewBaseEntity(parent, StartMessage_Name, []string{}),
 		BaseDrawer: core.NewBaseDrawer(0),
 		sprite:     core.NewSprite(assets.MessageImage, core.PivotCenter),
 		transform: core.Transform{
@@ -36,6 +36,6 @@ func NewInstructionsMessage(
 	}
 }
 
-func (sm *InstructionsMessage) Draw() {
+func (sm *StartMessage) Draw() {
 	sm.sprite.Draw(sm.transform)
 }

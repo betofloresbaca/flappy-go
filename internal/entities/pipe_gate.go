@@ -104,6 +104,9 @@ func (pg *PipeGate) GetX() float32 {
 	if pg.topBody != nil {
 		return pg.topBody.Position.X
 	}
+	if pg.bottomBody != nil {
+		return pg.bottomBody.Position.X
+	}
 	// Fallback to initial position if body doesn't exist yet
 	return pg.initialX
 }
@@ -121,9 +124,11 @@ func (pg *PipeGate) onAdd() {
 		raylib.Vector2{X: topCenterX, Y: topCenterY},
 		pipeWidth,
 		pipeHeight,
-		0, // density > 0 to allow velocity
+		0,
 	)
-	pg.topBody.UseGravity = false
+	if pg.topBody != nil {
+		pg.topBody.UseGravity = false
+	}
 
 	// Score body (covers the gap between pipes)
 	scoreCenterX := pg.initialX + pipeWidth/2
@@ -145,14 +150,14 @@ func (pg *PipeGate) onAdd() {
 		raylib.Vector2{X: bottomCenterX, Y: bottomCenterY},
 		pipeWidth,
 		pipeHeight,
-		0, // density > 0 to allow velocity
+		0,
 	)
-	pg.bottomBody.UseGravity = false
+	if pg.bottomBody != nil {
+		pg.bottomBody.UseGravity = false
+	}
 
 	if pg.Paused() {
-		pg.topBody.Enabled = false
-		pg.bottomBody.Enabled = false
-		pg.scoreBody.Enabled = false
+		pg.onPause()
 	}
 }
 
@@ -163,6 +168,10 @@ func (pg *PipeGate) onRemove() {
 		pg.topBody.Destroy()
 		pg.topBody = nil
 	}
+	if pg.scoreBody != nil {
+		pg.scoreBody.Destroy()
+		pg.scoreBody = nil
+	}
 	if pg.bottomBody != nil {
 		pg.bottomBody.Destroy()
 		pg.bottomBody = nil
@@ -171,24 +180,24 @@ func (pg *PipeGate) onRemove() {
 
 func (pg *PipeGate) onPause() {
 	if pg.topBody != nil {
-		pg.topBody.Enabled = false
+		pg.topBody.Paused = true
 	}
 	if pg.scoreBody != nil {
-		pg.scoreBody.Enabled = false
+		pg.scoreBody.Paused = true
 	}
 	if pg.bottomBody != nil {
-		pg.bottomBody.Enabled = false
+		pg.bottomBody.Paused = true
 	}
 }
 
 func (pg *PipeGate) onResume() {
 	if pg.topBody != nil {
-		pg.topBody.Enabled = true
+		pg.topBody.Paused = false
 	}
 	if pg.scoreBody != nil {
-		pg.scoreBody.Enabled = true
+		pg.scoreBody.Paused = false
 	}
 	if pg.bottomBody != nil {
-		pg.bottomBody.Enabled = true
+		pg.bottomBody.Paused = false
 	}
 }

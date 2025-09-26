@@ -81,5 +81,6 @@ func (g *Ground) onAdd() {
 func (g *Ground) onRemove() {
 	if g.body != nil {
 		g.body.Destroy()
+		g.body = nil
 	}
 }

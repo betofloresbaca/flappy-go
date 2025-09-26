@@ -4,7 +4,7 @@ import (
 	"flappy-go/internal/assets"
 	"flappy-go/internal/core"
 	"flappy-go/internal/ui"
-	"log"
+	"flappy-go/internal/utils"
 
 	physics "flappy-go/internal/core/physics"
 
@@ -32,7 +32,7 @@ type Player struct {
 	*core.BaseDrawer
 	animatedSprite *core.AnimatedSprite
 	body           *physics.Body
-	scoreDisplay   *ui.ScoreDisplay
+	scoreDisplay   *utils.Lazy[*ui.ScoreDisplay]
 	transform      core.Transform
 	isDead         bool
 }
@@ -53,6 +53,7 @@ func NewPlayer(parent *core.Scene, color string) *Player {
 		transform:      *core.NewTransform(Player_StartPositionX, Player_StartPositionY),
 		isDead:         false,
 	}
+	p.scoreDisplay = utils.NewLazy(p.getScoreDisplay)
 	p.BaseUpdater.OnPause = p.onPause
 	p.BaseUpdater.OnResume = p.onResume
 	p.BaseEntity.OnAdd = p.onAdd
@@ -129,23 +130,26 @@ func (p *Player) onAdd() {
 	// Set collision callback for logging
 	p.body.OnCollision = p.onCollision
 	if p.Paused() {
-		p.body.Enabled = false
+		p.body.Paused = true
 	}
 }
 
 func (p *Player) onRemove() {
-	p.body.Destroy()
+	if p.body != nil {
+		p.body.Destroy()
+		p.body = nil
+	}
 }
 
 func (p *Player) onPause() {
 	if p.body != nil {
-		p.body.Enabled = false
+		p.body.Paused = true
 	}
 }
 
 func (p *Player) onResume() {
 	if p.body != nil {
-		p.body.Enabled = true
+		p.body.Paused = false
 	}
 }
 
@@ -153,26 +157,19 @@ func (p *Player) onCollision(other *physics.Body, manifold *physics.Manifold) {
 	if p.Paused() || p.isDead {
 		return
 	}
-	log.Println("Player collided with", other.Tag)
 	switch other.Tag {
 	case PipeGate_ScoreTriggerTag:
 		other.Destroy() // Disable score trigger after scoring
-		p.searchScoreDisplay().Increment()
+		p.scoreDisplay.Value().Increment()
 	case Ground_BodyTag, PipeGate_PipeBodyTag:
 		p.die()
 	}
 }
 
-func (p *Player) searchScoreDisplay() *ui.ScoreDisplay {
-	if p.scoreDisplay == nil {
-		p.scoreDisplay = p.Root().
-			ChildByName("ui").(*core.Scene).
-			ChildByName("score_display").(*ui.ScoreDisplay)
-		if p.scoreDisplay == nil {
-			log.Println("Warning: Player could not find ScoreDisplay entity in scene")
-		}
-	}
-	return p.scoreDisplay
+func (p *Player) getScoreDisplay() *ui.ScoreDisplay {
+	return p.Root().
+		ChildByName("ui").(*core.Scene).
+		ChildByName("score_display").(*ui.ScoreDisplay)
 }
 
 func (p *Player) die() {
@@ -188,4 +185,8 @@ func (p *Player) die() {
 	// Pause the ground entity (only one expected)
 	ground.Pause()
 	p.isDead = true
+}
+
+func (p *Player) IsDead() bool {
+	return p.isDead
 }
